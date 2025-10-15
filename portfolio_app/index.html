@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio App</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="header" data-section="hero">
+      <nav class="navbar">
+        <span class="brand">MyPortfolio</span>
+        <button id="theme-toggle" aria-label="切换主题">🌙</button>
+      </nav>
+      <section class="hero">
+        <div class="hero__content">
+          <p class="hero__greeting">你好，我是</p>
+          <h1 class="hero__title">李想 · 产品设计师</h1>
+          <p class="hero__subtitle">
+            专注打造兼具美感与可用性的数字体验，为品牌创造独特价值。
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#projects">浏览作品</a>
+            <a class="btn" href="#contact">联系我</a>
+          </div>
+        </div>
+        <figure class="hero__media">
+          <img src="https://via.placeholder.com/320x380" alt="头像" />
+        </figure>
+      </section>
+    </header>
+
+    <main>
+      <section id="about" class="section section--grid">
+        <div>
+          <h2>关于我</h2>
+          <p>
+            拥有 7 年互联网产品设计经验，擅长从商业目标出发构建产品体验，
+            覆盖用户研究、信息架构、交互与视觉设计等环节。
+          </p>
+          <dl class="about__stats">
+            <div>
+              <dt>重点行业</dt>
+              <dd>金融科技、SaaS、消费电子</dd>
+            </div>
+            <div>
+              <dt>工具技能</dt>
+              <dd>Figma、Framer、Notion、HTML/CSS</dd>
+            </div>
+            <div>
+              <dt>工作方式</dt>
+              <dd>跨职能协作、敏捷迭代、数据驱动</dd>
+            </div>
+          </dl>
+        </div>
+        <aside class="about__highlights" aria-label="工作亮点">
+          <h3>近期亮点</h3>
+          <ul>
+            <li>主导企业级数据分析平台改版，提升留存率 18%</li>
+            <li>打造消费电子品牌官网体验，提升转化率 25%</li>
+            <li>建立设计系统规范，缩短交付时间 30%</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section id="projects" class="section">
+        <div class="section__header">
+          <h2>精选作品</h2>
+          <div class="filters" role="tablist" aria-label="作品分类">
+            <button class="filter-btn is-active" data-filter="all" role="tab">
+              全部
+            </button>
+            <button class="filter-btn" data-filter="product" role="tab">
+              产品体验
+            </button>
+            <button class="filter-btn" data-filter="branding" role="tab">
+              品牌设计
+            </button>
+            <button class="filter-btn" data-filter="ux" role="tab">
+              UX 研究
+            </button>
+          </div>
+        </div>
+        <div class="project-grid" role="list">
+          <article class="project-card" data-category="product" role="listitem">
+            <div class="project-card__header">
+              <span class="badge">产品体验</span>
+              <time datetime="2023">2023</time>
+            </div>
+            <h3>数据洞察平台 2.0</h3>
+            <p>
+              通过新的导航架构与可视化组件重构，帮助企业客户快速聚焦关键指标。
+            </p>
+            <a class="link" href="#">查看案例 →</a>
+          </article>
+          <article class="project-card" data-category="branding" role="listitem">
+            <div class="project-card__header">
+              <span class="badge badge--secondary">品牌设计</span>
+              <time datetime="2022">2022</time>
+            </div>
+            <h3>消费电子品牌官网升级</h3>
+            <p>
+              对品牌视觉语言进行系统化梳理，打造沉浸式产品展示体验。
+            </p>
+            <a class="link" href="#">查看案例 →</a>
+          </article>
+          <article class="project-card" data-category="ux" role="listitem">
+            <div class="project-card__header">
+              <span class="badge">UX 研究</span>
+              <time datetime="2021">2021</time>
+            </div>
+            <h3>智能家居用户旅程研究</h3>
+            <p>
+              基于访谈与日志分析梳理用户痛点，输出迭代路线图和机会点矩阵。
+            </p>
+            <a class="link" href="#">查看案例 →</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="testimonials" class="section section--alt">
+        <h2>客户反馈</h2>
+        <div class="testimonial-list" role="list">
+          <figure class="testimonial" role="listitem">
+            <blockquote>
+              “李想带来的设计方案让我们产品的上手门槛明显降低，团队合作非常顺畅。”
+            </blockquote>
+            <figcaption>—— 产品负责人，Fintech Pro</figcaption>
+          </figure>
+          <figure class="testimonial" role="listitem">
+            <blockquote>
+              “从调研到落地都很专业，快速帮助我们搭建起完整的设计系统。”
+            </blockquote>
+            <figcaption>—— 设计经理，SaaS Nova</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="contact" class="section section--grid">
+        <div>
+          <h2>联系我</h2>
+          <p>
+            欢迎合作与交流，可通过表单或邮箱 <a href="mailto:hi@example.com">hi@example.com</a>
+            联系。
+          </p>
+          <ul class="contact-info">
+            <li>所在地：上海</li>
+            <li>可用时间：每周一至周五 10:00 - 18:00</li>
+            <li>社交媒体：Behance · Dribbble · LinkedIn</li>
+          </ul>
+        </div>
+        <form id="contact-form" class="contact-form" novalidate>
+          <label class="form-field">
+            <span>姓名</span>
+            <input type="text" name="name" required placeholder="请填写您的姓名" />
+          </label>
+          <label class="form-field">
+            <span>邮箱</span>
+            <input type="email" name="email" required placeholder="example@email.com" />
+          </label>
+          <label class="form-field">
+            <span>合作需求</span>
+            <textarea
+              name="message"
+              rows="4"
+              required
+              placeholder="请简要说明需求"
+            ></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">发送需求</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© <span id="current-year"></span> Li Xiang. 保留所有权利。</p>
+      <div class="footer__links">
+        <a href="#about">关于我</a>
+        <a href="#projects">作品</a>
+        <a href="#contact">联系</a>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
