@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>王鸣笛 · 摄影师 / 剪辑师</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!-- 顶部导航 -->
+    <header class="header" data-section="hero">
+      <nav class="navbar">
+        <span class="brand">WangMingdi</span>
+        <div class="nav-links">
+          <a href="#about">关于我</a>
+          <a href="#experience">经历</a>
+          <a href="#projects">项目</a>
+          <a href="#skills">技能</a>
+          <a href="#works">作品</a>
+          <a href="#contact">联系</a>
+        </div>
+        <button id="theme-toggle" aria-label="切换主题">🌙</button>
+      </nav>
+
+      <!-- 首屏 -->
+      <section class="hero">
+        <div class="hero__content">
+          <p class="hero__greeting">你好，我是</p>
+          <h1 class="hero__title">王鸣笛 · 摄影师 / 剪辑师</h1>
+          <p class="hero__subtitle">
+            拥有艺术设计学背景与丰富的影像拍摄经验，擅长通过镜头呈现空间与人物的视觉故事。
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#projects">浏览作品</a>
+            <a class="btn" href="#contact">联系我</a>
+          </div>
+        </div>
+        <figure class="hero__media">
+          <!-- 用你的头像替换此图 -->
+          <img src="assets/me.jpg" alt="王鸣笛头像" />
+        </figure>
+      </section>
+    </header>
+
+    <main>
+      <!-- 关于我 -->
+      <section id="about" class="section section--grid">
+        <div>
+          <h2>关于我</h2>
+          <p>
+            拥有艺术设计学背景与丰富的项目影像拍摄经验，擅长通过镜头呈现空间与人物的视觉故事。
+            具备产品、空间、建筑、人像等多类型拍摄经验，熟练掌握后期剪辑与影像修图，
+            兼具商业审美与艺术创意。有无人机航拍经验及 CAAC 飞行执照，
+            能独立完成从策划、拍摄到后期的全流程创作。热衷将视觉叙事与品牌传播结合，
+            为客户提供高质量影像解决方案。
+          </p>
+        </div>
+
+        <aside class="about__highlights">
+          <h3>个人信息</h3>
+          <ul>
+            <li>📍 江苏苏州</li>
+            <li>📞 19314345676</li>
+            <li>🎓 琼台师范学院 · 艺术设计学（本科）</li>
+            <li>🪪 CAAC 无人机操作执照</li>
+          </ul>
+        </aside>
+      </section>
+
+      <!-- 工作经历 -->
+      <section id="experience" class="section">
+        <h2>工作经历</h2>
+        <div class="project-grid">
+          <article class="project-card">
+            <h3>苏州微纳纳米科技有限公司｜销售工程师（影像技术支持方向）</h3>
+            <time>2025.06 – 2025.09</time>
+            <p>
+              在光学及纳米材料相关 EPC 项目中，负责客户影像技术支持与样品拍摄方案制定；独立完成产品微观影像拍摄与显微图像处理；参与视频宣传素材拍摄与编辑，提出构图与视觉呈现建议。
+            </p>
+            <ul>
+              <li>客户影像资料拍摄合格率提升 40%</li>
+              <li>素材用于企业宣传与展会展示</li>
+            </ul>
+          </article>
+
+          <article class="project-card">
+            <h3>个人工作室｜摄影师 / 剪辑师</h3>
+            <time>2023.09 – 2025.05</time>
+            <p>
+              为智能制造企业提供影像解决方案，负责宣传片拍摄、影像脚本撰写与后期制作；独立完成全流程项目执行与客户对接。
+            </p>
+          </article>
+
+          <article class="project-card">
+            <h3>临沂市建筑设计研究院有限公司｜设计师助理（摄影协作）</h3>
+            <time>2022.10 – 2023.01</time>
+            <p>
+              参与建筑项目施工现场与模型拍摄，整理影像档案并参与视频剪辑与展示资料制作。
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- 项目经验 -->
+      <section id="projects" class="section">
+        <h2>项目经验</h2>
+        <div class="project-grid">
+          <article class="project-card" data-category="space">
+            <div class="project-card__header">
+              <span class="badge">空间摄影</span>
+              <time datetime="2023">2021.09 – 2023.09</time>
+            </div>
+            <h3>海南空间规划设计调研</h3>
+            <p>拍摄海南多地博物馆及三亚免税城空间影像资料，用于展示规划与宣传。</p>
+          </article>
+
+          <article class="project-card" data-category="space">
+            <div class="project-card__header">
+              <span class="badge">空间摄影</span>
+              <time datetime="2023">2021.01 – 2023.09</time>
+            </div>
+            <h3>海南自贸港民宿影像开发项目</h3>
+            <p>拍摄民宿建筑、室内与场景氛围；提出拍摄方案与后期设计建议，成果用于文旅推广。</p>
+          </article>
+
+          <article class="project-card" data-category="ecology">
+            <div class="project-card__header">
+              <span class="badge badge--secondary">生态记录</span>
+              <time datetime="2019">2019.07</time>
+            </div>
+            <h3>尖峰岭生态环境调研</h3>
+            <p>参与生态景观影像记录与视觉档案制作，提交生态影像调研报告及摄影论文。</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- 专业技能 -->
+      <section id="skills" class="section section--alt">
+        <h2>专业技能</h2>
+        <ul>
+          <li>📷 摄影拍摄：人像、建筑、空间、产品、活动、纪实</li>
+          <li>🎬 视频制作：拍摄、剪辑、调色（Premiere / DaVinci Resolve）</li>
+          <li>🖼️ 影像修图：Lightroom / Photoshop</li>
+          <li>🚁 航拍技能：无人机取景与航拍影像制作</li>
+          <li>💡 创意策划：影像脚本、灯光布置与场景设计</li>
+        </ul>
+      </section>
+
+      <!-- 代表作品（简表） -->
+      <section id="works" class="section">
+        <h2>代表作品</h2>
+        <ul>
+          <li>《海南影像志》空间摄影项目</li>
+          <li>《川渝小镇》主题影像记录</li>
+          <li>《人形机器人原理课件》产品视觉短片</li>
+        </ul>
+      </section>
+
+      <!-- 个人优势 -->
+      <section id="advantages" class="section section--grid">
+        <div>
+          <h2>个人优势</h2>
+          <ul>
+            <li>兼具艺术设计背景与影像技术执行力</li>
+            <li>擅长从商业与艺术角度统筹拍摄项目</li>
+            <li>熟悉全流程影像创作：前期策划 → 拍摄执行 → 后期出片</li>
+            <li>具有团队协作与客户沟通经验，理解品牌视觉需求</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 联系我 -->
+      <section id="contact" class="section section--grid">
+        <div>
+          <h2>联系我</h2>
+          <p>
+            欢迎合作与交流，可通过邮箱
+            <a href="mailto:19314345676@qq.com">19314345676@qq.com</a> 联系。
+          </p>
+          <ul class="contact-info">
+            <li>所在地：江苏苏州</li>
+            <li>联系电话：19314345676</li>
+            <li>可用时间：每周一至周五 10:00 - 18:00</li>
+          </ul>
+        </div>
+
+        <!-- 若暂时不收表单，可删掉此表单 -->
+        <form id="contact-form" class="contact-form" novalidate>
+          <label class="form-field">
+            <span>姓名</span>
+            <input type="text" name="name" required placeholder="请填写您的姓名" />
+          </label>
+          <label class="form-field">
+            <span>邮箱</span>
+            <input type="email" name="email" required placeholder="example@email.com" />
+          </label>
+          <label class="form-field">
+            <span>合作需求</span>
+            <textarea name="message" rows="4" required placeholder="请简要说明需求"></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">发送消息</button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© <span id="current-year"></span> 王鸣笛. 保留所有权利。</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
+/* ==============================
+   摄影师风格主题强化样式
+   ============================== */
+
+/* 整体背景与字体 */
+body {
+  background: radial-gradient(circle at 30% 20%, #1b1528 0%, #0e0b16 100%);
+  color: #e4e4e4;
+  font-family: 'Inter', 'PingFang SC', sans-serif;
+}
+
+/* 导航栏优化 */
+.navbar {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 主标题质感 */
+.hero__title {
+  background: linear-gradient(90deg, #c98eff, #8bc6ec);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2.8rem;
+  letter-spacing: 1px;
+}
+
+/* 副标题柔光 */
+.hero__subtitle {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* 按钮风格 */
+.btn {
+  border-radius: 40px;
+  padding: 0.8rem 1.6rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(236, 72, 153, 0.6);
+}
+
+/* 作品卡片 */
+.project-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.8rem;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.project-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 卡片标签样式 */
+.badge {
+  background: rgba(139, 92, 246, 0.3);
+  color: #d9b3ff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.badge--secondary {
+  background: rgba(236, 72, 153, 0.3);
+  color: #ffbde7;
+}
+
+/* 分区标题 */
+.section__header h2,
+.section h2 {
+  background: linear-gradient(90deg, #a78bfa, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+/* 关于我区块 */
+.about__stats dt {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.about__stats dd {
+  color: #d1d5db;
+}
+
+/* 客户反馈 */
+.testimonial {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border-left: 4px solid #8b5cf6;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.testimonial blockquote {
+  font-style: italic;
+  line-height: 1.7;
+}
+
+/* 联系表单 */
+.contact-form {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.form-field input,
+.form-field textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.8rem;
+  transition: border 0.3s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: #8b5cf6;
+  outline: none;
+}
+
+/* 页脚 */
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 1.2rem;
+  font-size: 0.9rem;
+}
