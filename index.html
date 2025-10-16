@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UIverse 卡片示例</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.45), rgba(15, 23, 42, 0.95)),
+          radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.35), rgba(15, 23, 42, 1));
+        font-family: "Inter", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #fff;
+        padding: 24px;
+      }
+
+      .card-wrapper {
+        width: 200px;
+        height: 300px;
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .card-outer-glow {
+        position: absolute;
+        inset: 0;
+        padding: 4px;
+        background: linear-gradient(135deg, #c084fc, #a855f7);
+        filter: blur(0.4px);
+        z-index: -1;
+      }
+
+      .card-outer-glow::after {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        border-radius: 1.25rem;
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 40px;
+        background: #1f1f1f;
+      }
+
+      .card-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.5rem;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      .card-spinner {
+        width: 8rem;
+        height: 8rem;
+        border-radius: 9999px;
+        background: conic-gradient(from 20deg, #a855f7, #f97316);
+        animation: spin 12s linear infinite;
+        filter: saturate(1.1);
+      }
+
+      .card-info {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        color: rgba(255, 255, 255, 0.85);
+        font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
+      }
+
+      .card-info-panel {
+        width: 60%;
+        padding: 12px;
+        padding-top: 16px;
+        padding-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 1rem;
+        background: rgba(248, 250, 252, 0.06);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        gap: 8px;
+      }
+
+      .card-info-panel h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .card-info-panel span {
+        font-size: 0.75rem;
+        color: rgba(226, 232, 240, 0.65);
+      }
+
+      .card-year {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: rgba(226, 232, 240, 0.65);
+      }
+
+      .card-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+      }
+
+      .card-meta span {
+        font-size: 0.625rem;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.55);
+      }
+
+      .card-meta button {
+        margin-top: auto;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 9999px;
+        background: rgba(248, 250, 252, 0.2);
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.3s ease;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .card-meta button:hover {
+        background: rgba(248, 250, 252, 0.3);
+        transform: translateY(-2px);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-wrapper">
+      <div class="card-outer-glow"></div>
+
+      <div class="card-content">
+        <div class="card-spinner" aria-hidden="true"></div>
+      </div>
+
+      <div class="card-info">
+        <div class="card-info-panel">
+          <h2>Card</h2>
+          <span>text</span>
+          <div class="card-year">2025</div>
+        </div>
+        <div class="card-meta">
+          <span>UIverse</span>
+          <span>card</span>
+          <button type="button" aria-label="前往下一项">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="16" height="16" fill="currentColor">
+              <path
+                d="M4.646 2.146a.5.5 0 0 0 0 .708L7.793 6 4.646 9.146a.5.5 0 1 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
