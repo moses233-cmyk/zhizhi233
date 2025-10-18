@@ -34,6 +34,27 @@ body {
   font-family: var(--font-sans);
   line-height: 1.7;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.night-sky-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.night-sky-background canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.night-sky-background.is-active {
+  opacity: 1;
 }
 
 body.lightbox-open {
@@ -260,8 +281,9 @@ ul {
   font-weight: 700;
   margin-top: 8px;
   background: linear-gradient(120deg, #2563eb, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+background-clip: text;           /* ✅ 标准属性 */
+-webkit-background-clip: text;   /* ✅ 厂商前缀版本 */
+-webkit-text-fill-color: transparent;
 }
 
 .profile-card__subtitle {
@@ -734,136 +756,126 @@ ul {
 }
 
 body[data-theme='dark'] {
-  --color-bg: #0b1221;
-  --color-surface: #111b2f;
-  --color-surface-alt: #0f172a;
-  --color-text: #e2e8f0;
-  --color-text-muted: #94a3b8;
-  --color-accent: #60a5fa;
-  --color-accent-muted: rgba(96, 165, 250, 0.15);
-  --color-border: rgba(148, 163, 184, 0.2);
-  --profile-surface: rgba(15, 23, 42, 0.78);
-  --profile-glow-1: rgba(96, 165, 250, 0.25);
-  --profile-glow-2: rgba(236, 72, 153, 0.28);
+  --color-bg: rgba(11, 18, 33, 0.6);
+  --color-surface: rgba(17, 27, 47, 0.75);
+  --color-surface-alt: rgba(15, 23, 42, 0.85);
+  --color-text: #e4e4e4;
+  --color-text-muted: rgba(226, 232, 240, 0.75);
+  --color-accent: #8b5cf6;
+  --color-accent-muted: rgba(139, 92, 246, 0.18);
+  --color-border: rgba(148, 163, 184, 0.28);
+  background: radial-gradient(circle at 30% 20%, #1b1528 0%, #0e0b16 100%);
 }
 
-.lightbox__nav--prev {
-  left: 12px;
+body[data-theme='dark'] .section {
+  background: rgba(9, 14, 27, 0.65);
+  backdrop-filter: blur(24px);
 }
 
-.lightbox__nav--next {
-  right: 12px;
-}
-
-@media (max-width: 1024px) {
-  .profile-card {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-card__meta {
-    border-top: 1px solid var(--color-border);
-    padding-top: 24px;
-  }
-
-  .contact-card {
-    grid-template-columns: 1fr;
-  }
-
-  .navbar__links {
-    gap: 20px;
-  }
-
-  .lightbox {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 48px;
-  }
-
-  .navbar__links {
-    flex-wrap: wrap;
-    font-size: 14px;
-  }
-
-  .hero__text {
-    order: 2;
-  }
-
-  .hero__portrait {
-    order: 1;
-  }
-
-  .profile-card__main {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-card__avatar {
-    max-width: 220px;
-    justify-self: center;
-  }
-
-  .lightbox__dialog {
-    padding: 24px;
-  }
-
-  .lightbox__nav {
-    width: 44px;
-    height: 44px;
-  }
-}
-
-@media (max-width: 560px) {
-  .navbar {
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .hero__actions {
-    width: 100%;
-  }
-
-  .btn {
-    flex: 1;
-    min-width: 140px;
-  }
-
-  .gallery-item {
-    padding: 16px;
-  }
-
-  .lightbox {
-    padding: 16px;
-  }
-
-  .lightbox__nav--prev {
-    left: 4px;
-  }
-
-  .lightbox__nav--next {
-    right: 4px;
-  }
-}
-
-body[data-theme='dark'] .hero::before {
-  opacity: 0.45;
-}
-
-body[data-theme='dark'] .profile-card {
-  box-shadow: 0 30px 90px rgba(2, 6, 23, 0.7);
-  border-color: rgba(148, 163, 184, 0.3);
-}
-
-body[data-theme='dark'] .profile-card__button {
-  background: rgba(96, 165, 250, 0.18);
-  border-color: rgba(96, 165, 250, 0.35);
+body[data-theme='dark'] .section--alt {
+  background: rgba(2, 8, 23, 0.82);
   color: #e2e8f0;
 }
 
-body[data-theme='dark'] .profile-card__button:hover {
-  background: rgba(96, 165, 250, 0.24);
+body[data-theme='dark'] .header {
+  background: linear-gradient(120deg, rgba(15, 23, 42, 0.78) 0%, rgba(2, 6, 23, 0.58) 100%);
+  backdrop-filter: blur(28px);
+}
+
+body[data-theme='dark'] .navbar,
+body[data-theme='dark'] .about__highlights,
+body[data-theme='dark'] .project-card,
+body[data-theme='dark'] .contact-form,
+body[data-theme='dark'] .filters,
+body[data-theme='dark'] #theme-toggle {
+  background: rgba(17, 27, 47, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: 0 24px 48px rgba(2, 8, 23, 0.45);
+}
+
+body[data-theme='dark'] .project-card:hover {
+  box-shadow: 0 28px 60px rgba(139, 92, 246, 0.28);
+}
+
+body[data-theme='dark'] .btn {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(148, 163, 184, 0.35);
+  border-radius: 40px;
+  padding: 0.8rem 1.6rem;
+}
+
+body[data-theme='dark'] .btn--primary {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  box-shadow: 0 18px 40px rgba(236, 72, 153, 0.38);
+  border-color: transparent;
+}
+
+body[data-theme='dark'] .btn--primary:hover {
+  box-shadow: 0 22px 48px rgba(236, 72, 153, 0.45);
+}
+
+body[data-theme='dark'] .hero__greeting,
+body[data-theme='dark'] .hero__subtitle {
+  color: rgba(226, 232, 240, 0.85);
+}
+
+body[data-theme='dark'] .hero__title,
+body[data-theme='dark'] .section__header h2,
+body[data-theme='dark'] .section h2 {
+  background: linear-gradient(90deg, #c98eff, #8bc6ec);
+background-clip: text;           /* ✅ 标准属性 */
+-webkit-background-clip: text;   /* ✅ 厂商前缀版本 */
+-webkit-text-fill-color: transparent;
+}
+
+body[data-theme='dark'] input,
+body[data-theme='dark'] textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 10px;
+  transition: border 0.3s ease;
+}
+
+body[data-theme='dark'] input:focus,
+body[data-theme='dark'] textarea:focus {
+  border-color: #8b5cf6;
+}
+
+body[data-theme='dark'] .testimonial {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #8b5cf6;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+body[data-theme='dark'] .testimonial blockquote {
+  font-style: italic;
+}
+
+body[data-theme='dark'] .badge {
+  background: rgba(139, 92, 246, 0.3);
+  color: #d9b3ff;
+}
+
+body[data-theme='dark'] .badge--secondary {
+  background: rgba(236, 72, 153, 0.3);
+  color: #ffbde7;
+}
+
+body[data-theme='dark'] .about__stats dt {
+  color: #a78bfa;
+}
+
+body[data-theme='dark'] .about__stats dd {
+  color: #d1d5db;
+}
+
+body[data-theme='dark'] .contact-form {
+  backdrop-filter: blur(18px);
+}
+
+body[data-theme='dark'] .footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 14, 27, 0.9);
+  color: rgba(255, 255, 255, 0.6);
 }
