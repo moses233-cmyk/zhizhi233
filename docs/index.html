@@ -3,373 +3,351 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>王鸣笛 · 摄影师 / 剪辑师</title>
+    <title>王鸣笛 · 影像作品集</title>
+    <meta name="description" content="王鸣笛的个人影像作品集，聚焦空间、人物与品牌的视觉叙事。" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Serif+SC:wght@500&display=swap"
       rel="stylesheet"
     />
   </head>
-
   <body>
-    <!-- 顶部导航 -->
-    <header class="header" data-section="hero">
+    <header class="site-header" id="home">
       <nav class="navbar">
-        <span class="brand">WangMingdi</span>
-        <div class="nav-links">
-          <a href="#about">关于我</a>
-          <a href="#experience">经历</a>
-          <a href="#projects">项目</a>
-          <a href="#skills">技能</a>
-          <a href="#works">作品</a>
-          <a href="#contact">联系</a>
-        </div>
-        <button id="theme-toggle" aria-label="切换主题">🌙</button>
+        <a class="navbar__brand" href="#home">Wang Mingdi</a>
+        <ul class="navbar__links">
+          <li><a href="#profile">个人卡片</a></li>
+          <li><a href="#gallery">图片作品</a></li>
+          <li><a href="#video">视频作品</a></li>
+          <li><a href="#contact">联系我</a></li>
+        </ul>
       </nav>
 
-      <!-- 首屏 -->
-      <section class="hero">
-        <div class="hero__content">
-          <p class="hero__greeting">你好，我是</p>
-          <h1 class="hero__title">王鸣笛 · 摄影师 / 剪辑师</h1>
-          <p class="hero__subtitle">
-            拥有艺术设计学背景与丰富的影像拍摄经验，擅长通过镜头呈现空间与人物的视觉故事。
+      <div class="hero">
+        <div class="hero__text">
+          <span class="hero__tagline">影像导演 · 摄影师 · 剪辑师</span>
+          <h1>用镜头打造空间与品牌的视觉故事</h1>
+          <p>
+            我是一名常驻苏州的影像创作者，擅长空间视觉、工业纪录与品牌宣传影片的策划与执行。
+            我喜欢把抽象的品牌理念，转化成有温度的画面，让作品既具美感又能传递价值。
           </p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="#projects">浏览作品</a>
-            <a class="btn" href="#contact">联系我</a>
+            <a class="btn btn--primary" href="#gallery">浏览作品集</a>
+            <a class="btn" href="#contact">预约创作</a>
           </div>
         </div>
-        <figure class="hero__media">
-          <!-- 用你的头像替换此图 -->
-          <img src="assets/me.jpg" alt="王鸣笛头像" />
+        <figure class="hero__portrait">
+          <img
+            src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=900&q=80"
+            alt="王鸣笛的创作肖像"
+          />
         </figure>
-      </section>
+      </div>
     </header>
 
     <main>
-      <!-- 关于我 -->
-      <section id="about" class="section section--grid">
-        <div>
-          <h2>关于我</h2>
-          <p>
-            拥有艺术设计学背景与丰富的项目影像拍摄经验，擅长通过镜头呈现空间与人物的视觉故事。
-            具备产品、空间、建筑、人像等多类型拍摄经验，熟练掌握后期剪辑与影像修图，
-            兼具商业审美与艺术创意。有无人机航拍经验及 CAAC 飞行执照，
-            能独立完成从策划、拍摄到后期的全流程创作。热衷将视觉叙事与品牌传播结合，
-            为客户提供高质量影像解决方案。
-          </p>
-        </div>
-
-        <aside class="about__highlights">
-          <h3>个人信息</h3>
-          <ul>
-            <li>📍 江苏苏州</li>
-            <li>📞 19314345676</li>
-            <li>🎓 琼台师范学院 · 艺术设计学（本科）</li>
-            <li>🪪 CAAC 无人机操作执照</li>
-          </ul>
-        </aside>
-      </section>
-
-      <!-- 工作经历 -->
-      <section id="experience" class="section">
-        <h2>工作经历</h2>
-        <div class="project-grid">
-          <article class="project-card">
-            <h3>苏州微纳纳米科技有限公司｜销售工程师（影像技术支持方向）</h3>
-            <time>2025.06 – 2025.09</time>
-            <p>
-              在光学及纳米材料相关 EPC 项目中，负责客户影像技术支持与样品拍摄方案制定；独立完成产品微观影像拍摄与显微图像处理；参与视频宣传素材拍摄与编辑，提出构图与视觉呈现建议。
-            </p>
-            <ul>
-              <li>客户影像资料拍摄合格率提升 40%</li>
-              <li>素材用于企业宣传与展会展示</li>
-            </ul>
-          </article>
-
-          <article class="project-card">
-            <h3>个人工作室｜摄影师 / 剪辑师</h3>
-            <time>2023.09 – 2025.05</time>
-            <p>
-              为智能制造企业提供影像解决方案，负责宣传片拍摄、影像脚本撰写与后期制作；独立完成全流程项目执行与客户对接。
-            </p>
-          </article>
-
-          <article class="project-card">
-            <h3>临沂市建筑设计研究院有限公司｜设计师助理（摄影协作）</h3>
-            <time>2022.10 – 2023.01</time>
-            <p>
-              参与建筑项目施工现场与模型拍摄，整理影像档案并参与视频剪辑与展示资料制作。
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <!-- 项目经验 -->
-      <section id="projects" class="section">
-        <h2>项目经验</h2>
-        <div class="project-grid">
-          <article class="project-card" data-category="space">
-            <div class="project-card__header">
-              <span class="badge">空间摄影</span>
-              <time datetime="2023">2021.09 – 2023.09</time>
-            </div>
-            <h3>海南空间规划设计调研</h3>
-            <p>拍摄海南多地博物馆及三亚免税城空间影像资料，用于展示规划与宣传。</p>
-          </article>
-
-          <article class="project-card" data-category="space">
-            <div class="project-card__header">
-              <span class="badge">空间摄影</span>
-              <time datetime="2023">2021.01 – 2023.09</time>
-            </div>
-            <h3>海南自贸港民宿影像开发项目</h3>
-            <p>拍摄民宿建筑、室内与场景氛围；提出拍摄方案与后期设计建议，成果用于文旅推广。</p>
-          </article>
-
-          <article class="project-card" data-category="ecology">
-            <div class="project-card__header">
-              <span class="badge badge--secondary">生态记录</span>
-              <time datetime="2019">2019.07</time>
-            </div>
-            <h3>尖峰岭生态环境调研</h3>
-            <p>参与生态景观影像记录与视觉档案制作，提交生态影像调研报告及摄影论文。</p>
-          </article>
-        </div>
-      </section>
-
-      <!-- 专业技能 -->
-      <section id="skills" class="section section--alt">
-        <h2>专业技能</h2>
-        <ul>
-          <li>📷 摄影拍摄：人像、建筑、空间、产品、活动、纪实</li>
-          <li>🎬 视频制作：拍摄、剪辑、调色（Premiere / DaVinci Resolve）</li>
-          <li>🖼️ 影像修图：Lightroom / Photoshop</li>
-          <li>🚁 航拍技能：无人机取景与航拍影像制作</li>
-          <li>💡 创意策划：影像脚本、灯光布置与场景设计</li>
-        </ul>
-      </section>
-
-      <!-- 代表作品（简表） -->
-      <section id="works" class="section">
-        <h2>代表作品</h2>
-        <ul>
-          <li>《海南影像志》空间摄影项目</li>
-          <li>《川渝小镇》主题影像记录</li>
-          <li>《人形机器人原理课件》产品视觉短片</li>
-        </ul>
-      </section>
-
-      <!-- 个人优势 -->
-      <section id="advantages" class="section section--grid">
-        <div>
-          <h2>个人优势</h2>
-          <ul>
-            <li>兼具艺术设计背景与影像技术执行力</li>
-            <li>擅长从商业与艺术角度统筹拍摄项目</li>
-            <li>熟悉全流程影像创作：前期策划 → 拍摄执行 → 后期出片</li>
-            <li>具有团队协作与客户沟通经验，理解品牌视觉需求</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- 联系我 -->
-      <section id="contact" class="section section--grid">
-        <div>
-          <h2>联系我</h2>
-          <p>
-            欢迎合作与交流，可通过邮箱
-            <a href="mailto:19314345676@qq.com">19314345676@qq.com</a> 联系。
-          </p>
-          <ul class="contact-info">
-            <li>所在地：江苏苏州</li>
-            <li>联系电话：19314345676</li>
-            <li>可用时间：每周一至周五 10:00 - 18:00</li>
-          </ul>
-        </div>
-
-        <!-- 若暂时不收表单，可删掉此表单 -->
-        <form id="contact-form" class="contact-form" novalidate>
-          <label class="form-field">
-            <span>姓名</span>
-            <input type="text" name="name" required placeholder="请填写您的姓名" />
-          </label>
-          <label class="form-field">
-            <span>邮箱</span>
-            <input type="email" name="email" required placeholder="example@email.com" />
-          </label>
-          <label class="form-field">
-            <span>合作需求</span>
-            <textarea name="message" rows="4" required placeholder="请简要说明需求"></textarea>
-          </label>
-          <div class="form-actions">
-            <button type="submit" class="btn btn--primary">发送消息</button>
-            <p class="form-status" role="status" aria-live="polite"></p>
+      <section id="profile" class="section">
+        <div class="section__header">
+          <div>
+            <h2>个人卡片</h2>
+            <p>快速了解我的创作风格、擅长领域以及合作信息。</p>
           </div>
-        </form>
+          <a class="link-arrow" href="#contact">立即合作</a>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-card__main">
+            <img
+              class="profile-card__avatar"
+              src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=420&q=80"
+              alt="王鸣笛头像"
+            />
+            <div>
+              <h3>王鸣笛</h3>
+              <p>
+                影像创作人，拥有艺术设计学背景。项目涵盖空间建筑、智能制造、品牌形象与人物纪录，执有
+                CAAC 无人机飞行执照，可独立完成从概念策划、拍摄到后期的完整流程。
+              </p>
+              <ul class="profile-card__tags">
+                <li>空间叙事</li>
+                <li>工业影像</li>
+                <li>航拍</li>
+                <li>品牌视觉</li>
+              </ul>
+            </div>
+          </div>
+          <div class="profile-card__meta">
+            <dl>
+              <div>
+                <dt>所在地</dt>
+                <dd>中国 · 苏州</dd>
+              </div>
+              <div>
+                <dt>合作邮箱</dt>
+                <dd><a href="mailto:hello@wangmingdi.com">hello@wangmingdi.com</a></dd>
+              </div>
+              <div>
+                <dt>服务项目</dt>
+                <dd>宣传片、空间摄影、品牌短片、后期剪辑</dd>
+              </div>
+              <div>
+                <dt>最近在做</dt>
+                <dd>智能制造品牌纪录片 · 建筑空间影像档案</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section id="gallery" class="section section--alt">
+        <div class="section__header">
+          <div>
+            <h2>图片作品</h2>
+            <p>精选空间与人物主题的拍摄作品，呈现氛围与细节。</p>
+          </div>
+          <a class="link-arrow" href="#video">继续看视频</a>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《静感 · 美术馆》空间视觉企划"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=900&q=80"
+                alt="现代美术馆展厅"
+              />
+            </a>
+            <figcaption>《静感 · 美术馆》空间视觉企划</figcaption>
+          </figure>
+
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《制造之心》智能工厂纪录影像"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+                alt="制造车间的机械臂"
+              />
+            </a>
+            <figcaption>《制造之心》智能工厂纪录影像</figcaption>
+          </figure>
+
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《光的城市》夜景建筑航拍"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80"
+                alt="城市建筑与灯光"
+              />
+            </a>
+            <figcaption>《光的城市》夜景建筑航拍</figcaption>
+          </figure>
+
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《日常片刻》生活方式品牌宣传"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80"
+                alt="品牌咖啡馆拍摄"
+              />
+            </a>
+            <figcaption>《日常片刻》生活方式品牌宣传</figcaption>
+          </figure>
+
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《侧影》人物采访合集"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=900&q=80"
+                alt="人物侧面光影肖像"
+              />
+            </a>
+            <figcaption>《侧影》人物采访合集</figcaption>
+          </figure>
+
+          <figure class="gallery-item">
+            <a
+              class="gallery-link"
+              href="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1600&q=90"
+              data-full="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1600&q=90"
+              data-caption="《未来工坊》科技展厅视觉记录"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=900&q=80"
+                alt="科技展厅互动装置"
+              />
+            </a>
+            <figcaption>《未来工坊》科技展厅视觉记录</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="video" class="section">
+        <div class="section__header">
+          <div>
+            <h2>视频作品</h2>
+            <p>不同项目的剪辑与导演案例，集中展现我的叙事节奏与色彩控制。</p>
+          </div>
+          <a class="link-arrow" href="mailto:hello@wangmingdi.com">获取完整片库</a>
+        </div>
+
+        <div class="media-grid">
+          <article class="media-card">
+            <div class="media-card__video">
+              <video
+                controls
+                preload="none"
+                poster="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80"
+              >
+                <source
+                  src="https://cdn.coverr.co/videos/coverr-woman-working-on-a-laptop-in-an-office-8356/1080p.mp4"
+                  type="video/mp4"
+                />
+                您的浏览器不支持视频播放。
+              </video>
+            </div>
+            <div class="media-card__body">
+              <h3>《01:00 AM 的办公室》品牌故事短片</h3>
+              <p>
+                为一家具设计品牌打造的情绪短片，以夜间办公场景呈现空间氛围与产品细节，强化品牌陪伴感。
+              </p>
+              <ul>
+                <li>导演 / 摄影 / 调色</li>
+                <li>风格：情绪化叙事 + 空间场景</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-card__video">
+              <video
+                controls
+                preload="none"
+                poster="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"
+              >
+                <source
+                  src="https://cdn.coverr.co/videos/coverr-lights-and-shadows-in-a-tunnel-6267/1080p.mp4"
+                  type="video/mp4"
+                />
+                您的浏览器不支持视频播放。
+              </video>
+            </div>
+            <div class="media-card__body">
+              <h3>《流动的光》空间艺术纪录</h3>
+              <p>
+                记录互动艺术展的沉浸式体验，通过慢动作与航拍结合，展现灯光与观众之间的互动关系。
+              </p>
+              <ul>
+                <li>导演 / 航拍 / 后期剪辑</li>
+                <li>风格：纪实记录 + 动态影像</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="media-card">
+            <div class="media-card__video">
+              <video
+                controls
+                preload="none"
+                poster="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80"
+              >
+                <source
+                  src="https://cdn.coverr.co/videos/coverr-a-man-giving-a-presentation-4538/1080p.mp4"
+                  type="video/mp4"
+                />
+                您的浏览器不支持视频播放。
+              </video>
+            </div>
+            <div class="media-card__body">
+              <h3>《未来制造》企业形象纪录片</h3>
+              <p>
+                以人物采访串联生产流程，强调技术优势与品牌温度，帮助客户构建可信赖的企业形象。
+              </p>
+              <ul>
+                <li>导演 / 摄影 / 访谈设计</li>
+                <li>风格：企业纪录 + 人物访谈</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="section section--accent">
+        <div class="contact-card">
+          <div>
+            <h2>联系我，一起创造新的影像经验</h2>
+            <p>
+              无论你是品牌方、空间设计师还是创新团队，都欢迎来聊聊你的故事。
+              我将为你定制兼具美感与策略的影像方案。
+            </p>
+          </div>
+          <div class="contact-card__info">
+            <a class="btn btn--primary" href="mailto:hello@wangmingdi.com">发送邮件</a>
+            <ul>
+              <li>电话：+86 193-1434-5676</li>
+              <li>微信：wangmingdi_visual</li>
+              <li>所在地：苏州 · 可全国出差</li>
+            </ul>
+          </div>
+        </div>
       </section>
     </main>
 
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <div class="lightbox__backdrop" data-lightbox-close></div>
+      <div
+        class="lightbox__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="图片预览"
+        tabindex="-1"
+      >
+        <button class="lightbox__close" type="button" aria-label="关闭" data-lightbox-close>
+          ×
+        </button>
+        <button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="上一张">
+          ←
+        </button>
+        <figure class="lightbox__figure">
+          <img id="lightbox-image" alt="" />
+          <figcaption id="lightbox-caption"></figcaption>
+        </figure>
+        <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张">
+          →
+        </button>
+      </div>
+    </div>
+
     <footer class="footer">
-      <p>© <span id="current-year"></span> 王鸣笛. 保留所有权利。</p>
+      <small>© 2025 Wang Mingdi. All rights reserved.</small>
+      <div class="footer__links">
+        <a href="#gallery">作品集</a>
+        <a href="mailto:hello@wangmingdi.com">商务合作</a>
+        <a href="#home">回到顶部</a>
+      </div>
     </footer>
 
-    <script src="app.js"></script>
+    <script defer src="app.js"></script>
   </body>
 </html>
-
-/* ==============================
-   摄影师风格主题强化样式
-   ============================== */
-
-/* 整体背景与字体 */
-body {
-  background: radial-gradient(circle at 30% 20%, #1b1528 0%, #0e0b16 100%);
-  color: #e4e4e4;
-  font-family: 'Inter', 'PingFang SC', sans-serif;
-}
-
-/* 导航栏优化 */
-.navbar {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 1rem 2rem;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
-}
-
-/* 主标题质感 */
-.hero__title {
-  background: linear-gradient(90deg, #c98eff, #8bc6ec);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 2.8rem;
-  letter-spacing: 1px;
-}
-
-/* 副标题柔光 */
-.hero__subtitle {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 300;
-  line-height: 1.8;
-}
-
-/* 按钮风格 */
-.btn {
-  border-radius: 40px;
-  padding: 0.8rem 1.6rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn--primary {
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
-  color: #fff;
-}
-
-.btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(236, 72, 153, 0.6);
-}
-
-/* 作品卡片 */
-.project-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 1.8rem;
-  transition: all 0.4s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-.project-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* 卡片标签样式 */
-.badge {
-  background: rgba(139, 92, 246, 0.3);
-  color: #d9b3ff;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-}
-
-.badge--secondary {
-  background: rgba(236, 72, 153, 0.3);
-  color: #ffbde7;
-}
-
-/* 分区标题 */
-.section__header h2,
-.section h2 {
-  background: linear-gradient(90deg, #a78bfa, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 700;
-  font-size: 1.8rem;
-}
-
-/* 关于我区块 */
-.about__stats dt {
-  color: #a78bfa;
-  font-weight: 600;
-}
-
-.about__stats dd {
-  color: #d1d5db;
-}
-
-/* 客户反馈 */
-.testimonial {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 1.5rem;
-  border-left: 4px solid #8b5cf6;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
-}
-
-.testimonial blockquote {
-  font-style: italic;
-  line-height: 1.7;
-}
-
-/* 联系表单 */
-.contact-form {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 20px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.form-field input,
-.form-field textarea {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-radius: 10px;
-  padding: 0.8rem;
-  transition: border 0.3s ease;
-}
-
-.form-field input:focus,
-.form-field textarea:focus {
-  border-color: #8b5cf6;
-  outline: none;
-}
-
-/* 页脚 */
-.footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  padding: 1.2rem;
-  font-size: 0.9rem;
-}
