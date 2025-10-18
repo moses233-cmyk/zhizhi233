@@ -3,8 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>王鸣笛 · 影像作品集</title>
-    <meta name="description" content="王鸣笛的个人影像作品集，聚焦空间、人物与品牌的视觉叙事。" />
+    <title data-i18n="meta.title">王鸣笛 · 影像作品集</title>
+    <meta
+      name="description"
+      content="王鸣笛的个人影像作品集，聚焦空间、人物与品牌的视觉叙事。"
+      data-i18n-attr="content:meta.description"
+    />
     <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,17 +20,45 @@
   <body>
     <header class="site-header" id="home">
       <nav class="navbar">
-        <a class="navbar__brand" href="#home">Wang Mingdi</a>
-        <ul class="navbar__links">
-          <li><a href="#profile">个人卡片</a></li>
-          <li><a href="#gallery">图片作品</a></li>
-          <li><a href="#video">视频作品</a></li>
-          <li><a href="#contact">联系我</a></li>
-        </ul>
+        <a class="navbar__brand" href="#home" data-i18n="nav.brand">Wang Mingdi</a>
+        <div class="navbar__actions">
+          <ul class="navbar__links">
+            <li><a href="#profile" data-i18n="nav.profile">个人卡片</a></li>
+            <li><a href="#gallery" data-i18n="nav.gallery">图片作品</a></li>
+            <li><a href="#video" data-i18n="nav.video">视频作品</a></li>
+            <li><a href="#contact" data-i18n="nav.contact">联系我</a></li>
+          </ul>
+          <button
+            id="language-toggle"
+            class="language-toggle"
+            type="button"
+            aria-label="切换为英文"
+            aria-pressed="false"
+            data-i18n-attr="aria-label:language.toggleAria"
+          >
+            <span class="language-toggle__label" data-i18n="language.toggleLabel">English</span>
+          </button>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="切换至夜间模式"
+            aria-pressed="false"
+            data-theme-label-light="切换至夜间模式"
+            data-theme-label-dark="切换至日间模式"
+            data-i18n-attr="aria-label:theme.toggleAria,data-theme-label-light:theme.toggleLabelLight,data-theme-label-dark:theme.toggleLabelDark"
+          >
+            <span class="theme-toggle__icon" aria-hidden="true">&#127769;</span>
+            <span class="theme-toggle__text" data-i18n="theme.text.night">夜间模式</span>
+          </button>
+        </div>
       </nav>
-
       <!-- 首屏 -->
-      <section class="hero" aria-label="个人名片与客户评价">
+      <section
+        class="hero"
+        aria-label="个人名片与客户评价"
+        data-i18n-attr="aria-label:hero.ariaLabel"
+      >
         <div
           class="profile-card"
           data-component="animated-testimonials"
@@ -35,55 +67,94 @@
           <div class="profile-card__media">
             <div class="profile-card__stack" aria-hidden="true">
               <figure class="profile-card__image is-active" data-index="0">
-                <img src="assets/me.jpg" alt="王鸣笛摄影作品集锦" loading="lazy" />
+                <img
+                  src="assets/me.jpg"
+                  alt="王鸣笛摄影作品集锦"
+                  loading="lazy"
+                  data-i18n-attr="alt:hero.media1.alt"
+                />
               </figure>
               <figure class="profile-card__image" data-index="1">
-                <img src="assets/me.jpg" alt="王鸣笛在棚内布光场景" loading="lazy" />
+                <img
+                  src="assets/me.jpg"
+                  alt="王鸣笛在棚内布光场景"
+                  loading="lazy"
+                  data-i18n-attr="alt:hero.media2.alt"
+                />
               </figure>
               <figure class="profile-card__image" data-index="2">
-                <img src="assets/me.jpg" alt="王鸣笛外景拍摄实况" loading="lazy" />
+                <img
+                  src="assets/me.jpg"
+                  alt="王鸣笛外景拍摄实况"
+                  loading="lazy"
+                  data-i18n-attr="alt:hero.media3.alt"
+                />
               </figure>
             </div>
           </div>
           <div class="profile-card__content">
             <article class="profile-card__entry is-active" data-index="0">
               <header class="profile-card__header">
-                <p class="profile-card__greeting">你好，我是</p>
-                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
-                <p class="profile-card__subtitle">
+                <p class="profile-card__greeting" data-i18n="hero.entry1.greeting">你好，我是</p>
+                <h1 class="profile-card__title" data-i18n="hero.entry1.title">
+                  王鸣笛 · 摄影师 / 剪辑师
+                </h1>
+                <p class="profile-card__subtitle" data-i18n="hero.entry1.subtitle">
                   专注空间、建筑与人像影像创作，擅长用镜头构建品牌视觉故事。
                 </p>
               </header>
-              <blockquote class="profile-card__quote" aria-live="polite">
+              <blockquote
+                class="profile-card__quote"
+                aria-live="polite"
+                data-i18n="hero.entry1.quote"
+              >
                 “鸣笛的镜头让我们的空间焕发生命力，从拍摄到成片都极具质感。”
               </blockquote>
-              <p class="profile-card__meta">—— 苏州微纳纳米科技 · 品牌市场部</p>
+              <p class="profile-card__meta" data-i18n="hero.entry1.meta">
+                —— 苏州微纳纳米科技 · 品牌市场部
+              </p>
             </article>
             <article class="profile-card__entry" data-index="1">
               <header class="profile-card__header">
-                <p class="profile-card__greeting">你好，我是</p>
-                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
-                <p class="profile-card__subtitle">
+                <p class="profile-card__greeting" data-i18n="hero.entry2.greeting">你好，我是</p>
+                <h1 class="profile-card__title" data-i18n="hero.entry2.title">
+                  王鸣笛 · 摄影师 / 剪辑师
+                </h1>
+                <p class="profile-card__subtitle" data-i18n="hero.entry2.subtitle">
                   将艺术设计背景与商业需求结合，打造可落地的影像解决方案。
                 </p>
               </header>
-              <blockquote class="profile-card__quote" aria-live="polite">
+              <blockquote
+                class="profile-card__quote"
+                aria-live="polite"
+                data-i18n="hero.entry2.quote"
+              >
                 “他总能在有限时间内完成复杂拍摄任务，并保持影像风格的统一。”
               </blockquote>
-              <p class="profile-card__meta">—— 临沂市建筑设计研究院 · 项目组</p>
+              <p class="profile-card__meta" data-i18n="hero.entry2.meta">
+                —— 临沂市建筑设计研究院 · 项目组
+              </p>
             </article>
             <article class="profile-card__entry" data-index="2">
               <header class="profile-card__header">
-                <p class="profile-card__greeting">你好，我是</p>
-                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
-                <p class="profile-card__subtitle">
+                <p class="profile-card__greeting" data-i18n="hero.entry3.greeting">你好，我是</p>
+                <h1 class="profile-card__title" data-i18n="hero.entry3.title">
+                  王鸣笛 · 摄影师 / 剪辑师
+                </h1>
+                <p class="profile-card__subtitle" data-i18n="hero.entry3.subtitle">
                   无人机航拍持证摄影师，为城市与自然提供沉浸式视觉记录。
                 </p>
               </header>
-              <blockquote class="profile-card__quote" aria-live="polite">
+              <blockquote
+                class="profile-card__quote"
+                aria-live="polite"
+                data-i18n="hero.entry3.quote"
+              >
                 “与鸣笛合作是一次快体验，他的脚本规划让拍摄流程顺畅高效。”
               </blockquote>
-              <p class="profile-card__meta">—— 人形机器人项目 · 负责人</p>
+              <p class="profile-card__meta" data-i18n="hero.entry3.meta">
+                —— 人形机器人项目 · 负责人
+              </p>
             </article>
             <div class="profile-card__actions">
               <button
@@ -91,6 +162,7 @@
                 type="button"
                 data-action="prev"
                 aria-label="查看上一条评价"
+                data-i18n-attr="aria-label:hero.actions.prev"
               >
                 <span aria-hidden="true">←</span>
               </button>
@@ -99,11 +171,12 @@
                 type="button"
                 data-action="next"
                 aria-label="查看下一条评价"
+                data-i18n-attr="aria-label:hero.actions.next"
               >
                 <span aria-hidden="true">→</span>
               </button>
-              <a class="btn btn--primary" href="#projects">浏览作品</a>
-              <a class="btn" href="#contact">联系我</a>
+              <a class="btn btn--primary" href="#projects" data-i18n="hero.actions.primary">浏览作品</a>
+              <a class="btn" href="#contact" data-i18n="hero.actions.secondary">联系我</a>
             </div>
           </div>
         </div>
@@ -114,10 +187,10 @@
       <section id="profile" class="section">
         <div class="section__header">
           <div>
-            <h2>个人卡片</h2>
-            <p>快速了解我的创作风格、擅长领域以及合作信息。</p>
+            <h2 data-i18n="profile.title">个人卡片</h2>
+            <p data-i18n="profile.lead">快速了解我的创作风格、擅长领域以及合作信息。</p>
           </div>
-          <a class="link-arrow" href="#contact">立即合作</a>
+          <a class="link-arrow" href="#contact" data-i18n="profile.cta">立即合作</a>
         </div>
 
         <div class="profile-card">
@@ -126,38 +199,39 @@
               class="profile-card__avatar"
               src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=420&q=80"
               alt="王鸣笛头像"
+              data-i18n-attr="alt:profile.avatar.alt"
             />
             <div>
-              <h3>王鸣笛</h3>
-              <p>
+              <h3 data-i18n="profile.name">王鸣笛</h3>
+              <p data-i18n="profile.bio">
                 影像创作人，拥有艺术设计学背景。项目涵盖空间建筑、智能制造、品牌形象与人物纪录，执有
                 CAAC 无人机飞行执照，可独立完成从概念策划、拍摄到后期的完整流程。
               </p>
               <ul class="profile-card__tags">
-                <li>空间叙事</li>
-                <li>工业影像</li>
-                <li>航拍</li>
-                <li>品牌视觉</li>
+                <li data-i18n="profile.tags.space">空间叙事</li>
+                <li data-i18n="profile.tags.industry">工业影像</li>
+                <li data-i18n="profile.tags.aerial">航拍</li>
+                <li data-i18n="profile.tags.brand">品牌视觉</li>
               </ul>
             </div>
           </div>
           <div class="profile-card__meta">
             <dl>
               <div>
-                <dt>所在地</dt>
-                <dd>中国 · 苏州</dd>
+                <dt data-i18n="profile.location.label">所在地</dt>
+                <dd data-i18n="profile.location.value">中国 · 苏州</dd>
               </div>
               <div>
-                <dt>合作邮箱</dt>
+                <dt data-i18n="profile.email.label">合作邮箱</dt>
                 <dd><a href="mailto:hello@wangmingdi.com">hello@wangmingdi.com</a></dd>
               </div>
               <div>
-                <dt>服务项目</dt>
-                <dd>宣传片、空间摄影、品牌短片、后期剪辑</dd>
+                <dt data-i18n="profile.services.label">服务项目</dt>
+                <dd data-i18n="profile.services.value">宣传片、空间摄影、品牌短片、后期剪辑</dd>
               </div>
               <div>
-                <dt>最近在做</dt>
-                <dd>智能制造品牌纪录片 · 建筑空间影像档案</dd>
+                <dt data-i18n="profile.current.label">最近在做</dt>
+                <dd data-i18n="profile.current.value">智能制造品牌纪录片 · 建筑空间影像档案</dd>
               </div>
             </dl>
           </div>
@@ -167,10 +241,10 @@
       <section id="gallery" class="section section--alt">
         <div class="section__header">
           <div>
-            <h2>图片作品</h2>
-            <p>精选空间与人物主题的拍摄作品，呈现氛围与细节。</p>
+            <h2 data-i18n="gallery.title">图片作品</h2>
+            <p data-i18n="gallery.lead">精选空间与人物主题的拍摄作品，呈现氛围与细节。</p>
           </div>
-          <a class="link-arrow" href="#video">继续看视频</a>
+          <a class="link-arrow" href="#video" data-i18n="gallery.cta">继续看视频</a>
         </div>
 
         <div class="gallery-grid">
@@ -180,13 +254,15 @@
               href="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=1600&q=90"
               data-caption="《静感 · 美术馆》空间视觉企划"
+              data-i18n-attr="data-caption:gallery.item1.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1529429617124-aee071ce2f6d?auto=format&fit=crop&w=900&q=80"
                 alt="现代美术馆展厅"
+                data-i18n-attr="alt:gallery.item1.alt"
               />
             </a>
-            <figcaption>《静感 · 美术馆》空间视觉企划</figcaption>
+            <figcaption data-i18n="gallery.item1.title">《静感 · 美术馆》空间视觉企划</figcaption>
           </figure>
 
           <figure class="gallery-item">
@@ -195,13 +271,15 @@
               href="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90"
               data-caption="《制造之心》智能工厂纪录影像"
+              data-i18n-attr="data-caption:gallery.item2.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
                 alt="制造车间的机械臂"
+                data-i18n-attr="alt:gallery.item2.alt"
               />
             </a>
-            <figcaption>《制造之心》智能工厂纪录影像</figcaption>
+            <figcaption data-i18n="gallery.item2.title">《制造之心》智能工厂纪录影像</figcaption>
           </figure>
 
           <figure class="gallery-item">
@@ -210,13 +288,15 @@
               href="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=1600&q=90"
               data-caption="《光的城市》夜景建筑航拍"
+              data-i18n-attr="data-caption:gallery.item3.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&w=900&q=80"
                 alt="城市建筑与灯光"
+                data-i18n-attr="alt:gallery.item3.alt"
               />
             </a>
-            <figcaption>《光的城市》夜景建筑航拍</figcaption>
+            <figcaption data-i18n="gallery.item3.title">《光的城市》夜景建筑航拍</figcaption>
           </figure>
 
           <figure class="gallery-item">
@@ -225,13 +305,15 @@
               href="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=90"
               data-caption="《日常片刻》生活方式品牌宣传"
+              data-i18n-attr="data-caption:gallery.item4.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80"
                 alt="品牌咖啡馆拍摄"
+                data-i18n-attr="alt:gallery.item4.alt"
               />
             </a>
-            <figcaption>《日常片刻》生活方式品牌宣传</figcaption>
+            <figcaption data-i18n="gallery.item4.title">《日常片刻》生活方式品牌宣传</figcaption>
           </figure>
 
           <figure class="gallery-item">
@@ -240,13 +322,15 @@
               href="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=1600&q=90"
               data-caption="《侧影》人物采访合集"
+              data-i18n-attr="data-caption:gallery.item5.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1515378791036-0648a3ef77e2?auto=format&fit=crop&w=900&q=80"
                 alt="人物侧面光影肖像"
+                data-i18n-attr="alt:gallery.item5.alt"
               />
             </a>
-            <figcaption>《侧影》人物采访合集</figcaption>
+            <figcaption data-i18n="gallery.item5.title">《侧影》人物采访合集</figcaption>
           </figure>
 
           <figure class="gallery-item">
@@ -255,13 +339,15 @@
               href="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1600&q=90"
               data-full="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1600&q=90"
               data-caption="《未来工坊》科技展厅视觉记录"
+              data-i18n-attr="data-caption:gallery.item6.caption"
             >
               <img
                 src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=900&q=80"
                 alt="科技展厅互动装置"
+                data-i18n-attr="alt:gallery.item6.alt"
               />
             </a>
-            <figcaption>《未来工坊》科技展厅视觉记录</figcaption>
+            <figcaption data-i18n="gallery.item6.title">《未来工坊》科技展厅视觉记录</figcaption>
           </figure>
         </div>
       </section>
@@ -269,10 +355,10 @@
       <section id="video" class="section">
         <div class="section__header">
           <div>
-            <h2>视频作品</h2>
-            <p>不同项目的剪辑与导演案例，集中展现我的叙事节奏与色彩控制。</p>
+            <h2 data-i18n="video.title">视频作品</h2>
+            <p data-i18n="video.lead">不同项目的剪辑与导演案例，集中展现我的叙事节奏与色彩控制。</p>
           </div>
-          <a class="link-arrow" href="mailto:hello@wangmingdi.com">获取完整片库</a>
+          <a class="link-arrow" href="mailto:hello@wangmingdi.com" data-i18n="video.cta">获取完整片库</a>
         </div>
 
         <div class="media-grid">
@@ -287,17 +373,17 @@
                   src="https://cdn.coverr.co/videos/coverr-woman-working-on-a-laptop-in-an-office-8356/1080p.mp4"
                   type="video/mp4"
                 />
-                您的浏览器不支持视频播放。
+                <span data-i18n="video.fallback">您的浏览器不支持视频播放。</span>
               </video>
             </div>
             <div class="media-card__body">
-              <h3>《01:00 AM 的办公室》品牌故事短片</h3>
-              <p>
+              <h3 data-i18n="video.item1.title">《01:00 AM 的办公室》品牌故事短片</h3>
+              <p data-i18n="video.item1.body">
                 为一家具设计品牌打造的情绪短片，以夜间办公场景呈现空间氛围与产品细节，强化品牌陪伴感。
               </p>
               <ul>
-                <li>导演 / 摄影 / 调色</li>
-                <li>风格：情绪化叙事 + 空间场景</li>
+                <li data-i18n="video.item1.point1">导演 / 摄影 / 调色</li>
+                <li data-i18n="video.item1.point2">风格：情绪化叙事 + 空间场景</li>
               </ul>
             </div>
           </article>
@@ -313,17 +399,17 @@
                   src="https://cdn.coverr.co/videos/coverr-lights-and-shadows-in-a-tunnel-6267/1080p.mp4"
                   type="video/mp4"
                 />
-                您的浏览器不支持视频播放。
+                <span data-i18n="video.fallback">您的浏览器不支持视频播放。</span>
               </video>
             </div>
             <div class="media-card__body">
-              <h3>《流动的光》空间艺术纪录</h3>
-              <p>
+              <h3 data-i18n="video.item2.title">《流动的光》空间艺术纪录</h3>
+              <p data-i18n="video.item2.body">
                 记录互动艺术展的沉浸式体验，通过慢动作与航拍结合，展现灯光与观众之间的互动关系。
               </p>
               <ul>
-                <li>导演 / 航拍 / 后期剪辑</li>
-                <li>风格：纪实记录 + 动态影像</li>
+                <li data-i18n="video.item2.point1">导演 / 航拍 / 后期剪辑</li>
+                <li data-i18n="video.item2.point2">风格：纪实记录 + 动态影像</li>
               </ul>
             </div>
           </article>
@@ -339,17 +425,17 @@
                   src="https://cdn.coverr.co/videos/coverr-a-man-giving-a-presentation-4538/1080p.mp4"
                   type="video/mp4"
                 />
-                您的浏览器不支持视频播放。
+                <span data-i18n="video.fallback">您的浏览器不支持视频播放。</span>
               </video>
             </div>
             <div class="media-card__body">
-              <h3>《未来制造》企业形象纪录片</h3>
-              <p>
+              <h3 data-i18n="video.item3.title">《未来制造》企业形象纪录片</h3>
+              <p data-i18n="video.item3.body">
                 以人物采访串联生产流程，强调技术优势与品牌温度，帮助客户构建可信赖的企业形象。
               </p>
               <ul>
-                <li>导演 / 摄影 / 访谈设计</li>
-                <li>风格：企业纪录 + 人物访谈</li>
+                <li data-i18n="video.item3.point1">导演 / 摄影 / 访谈设计</li>
+                <li data-i18n="video.item3.point2">风格：企业纪录 + 人物访谈</li>
               </ul>
             </div>
           </article>
@@ -359,18 +445,20 @@
       <section id="contact" class="section section--accent">
         <div class="contact-card">
           <div>
-            <h2>联系我，一起创造新的影像经验</h2>
-            <p>
+            <h2 data-i18n="contact.title">联系我，一起创造新的影像经验</h2>
+            <p data-i18n="contact.lead">
               无论你是品牌方、空间设计师还是创新团队，都欢迎来聊聊你的故事。
               我将为你定制兼具美感与策略的影像方案。
             </p>
           </div>
           <div class="contact-card__info">
-            <a class="btn btn--primary" href="mailto:hello@wangmingdi.com">发送邮件</a>
+            <a class="btn btn--primary" href="mailto:hello@wangmingdi.com" data-i18n="contact.cta"
+              >发送邮件</a
+            >
             <ul>
-              <li>电话：+86 193-1434-5676</li>
-              <li>微信：wangmingdi_visual</li>
-              <li>所在地：苏州 · 可全国出差</li>
+              <li data-i18n="contact.phone">电话：+86 193-1434-5676</li>
+              <li data-i18n="contact.wechat">微信：wangmingdi_visual</li>
+              <li data-i18n="contact.location">所在地：苏州 · 可全国出差</li>
             </ul>
           </div>
         </div>
@@ -384,30 +472,47 @@
         role="dialog"
         aria-modal="true"
         aria-label="图片预览"
+        data-i18n-attr="aria-label:lightbox.dialogAria"
         tabindex="-1"
       >
-        <button class="lightbox__close" type="button" aria-label="关闭" data-lightbox-close>
+        <button
+          class="lightbox__close"
+          type="button"
+          aria-label="关闭"
+          data-lightbox-close
+          data-i18n-attr="aria-label:lightbox.close"
+        >
           ×
         </button>
-        <button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="上一张">
+        <button
+          class="lightbox__nav lightbox__nav--prev"
+          type="button"
+          aria-label="上一张"
+          data-i18n-attr="aria-label:lightbox.prev"
+        >
           ←
         </button>
         <figure class="lightbox__figure">
           <img id="lightbox-image" alt="" />
           <figcaption id="lightbox-caption"></figcaption>
         </figure>
-        <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="下一张">
+        <button
+          class="lightbox__nav lightbox__nav--next"
+          type="button"
+          aria-label="下一张"
+          data-i18n-attr="aria-label:lightbox.next"
+        >
           →
         </button>
       </div>
     </div>
 
     <footer class="footer">
-      <small>© 2025 Wang Mingdi. All rights reserved.</small>
+      <small data-i18n="footer.copy">© 2025 Wang Mingdi. All rights reserved.</small>
       <div class="footer__links">
-        <a href="#gallery">作品集</a>
-        <a href="mailto:hello@wangmingdi.com">商务合作</a>
-        <a href="#home">回到顶部</a>
+        <a href="#gallery" data-i18n="footer.gallery">作品集</a>
+        <a href="mailto:hello@wangmingdi.com" data-i18n="footer.contact">商务合作</a>
+        <a href="#home" data-i18n="footer.backToTop">回到顶部</a>
       </div>
     </footer>
 

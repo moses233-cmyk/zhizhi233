@@ -1,14 +1,255 @@
 const state = {
   theme: localStorage.getItem('theme') || 'light',
+  language: localStorage.getItem('language') || 'zh',
 };
 
+const html = document.documentElement;
 const root = document.body;
 const themeToggle = document.querySelector('#theme-toggle');
+const languageToggle = document.querySelector('#language-toggle');
 const filterButtons = Array.from(document.querySelectorAll('.filter-btn'));
 const projectCards = Array.from(document.querySelectorAll('.project-card'));
 const contactForm = document.querySelector('#contact-form');
+const formStatus = contactForm ? contactForm.querySelector('[data-form-status]') : null;
 const currentYear = document.querySelector('#current-year');
 const testimonialCard = document.querySelector('[data-component="animated-testimonials"]');
+
+const translations = {
+  zh: {
+    'theme.text.day': '\u65E5\u95F4\u6A21\u5F0F',
+    'form.success': '\u8868\u5355\u5DF2\u63D0\u4EA4\uFF0C\u6211\u4EEC\u4F1A\u5C3D\u5FEB\u56DE\u590D\u60A8\uFF01',
+  },
+  en: {
+    'meta.title': 'Wang Mingdi - Film & Visual Works',
+    'meta.description':
+      'The portfolio of filmmaker Wang Mingdi, capturing visual stories for spaces, people, and brands.',
+    'nav.brand': 'Wang Mingdi',
+    'nav.profile': 'Profile',
+    'nav.gallery': 'Photography',
+    'nav.video': 'Video',
+    'nav.contact': 'Contact',
+    'language.toggleAria': 'Switch to Chinese',
+    'language.toggleLabel': '\u4E2D\u6587',
+    'theme.toggleAria': 'Toggle night mode',
+    'theme.toggleLabelLight': 'Switch to night mode',
+    'theme.toggleLabelDark': 'Switch to daylight mode',
+    'theme.text.night': 'Night Mode',
+    'theme.text.day': 'Day Mode',
+    'hero.ariaLabel': 'Profile card and client testimonials',
+    'hero.media1.alt': 'Portfolio portraits created by Wang Mingdi',
+    'hero.media2.alt': 'Wang Mingdi lighting a studio scene',
+    'hero.media3.alt': 'Wang Mingdi filming on location',
+    'hero.entry1.greeting': 'Hi, I am',
+    'hero.entry1.title': 'Wang Mingdi - Photographer / Editor',
+    'hero.entry1.subtitle': 'Focused on spatial, architectural, and portrait storytelling for brands.',
+    'hero.entry1.quote':
+      'Mingdi brings our space to life; from shoot to final cut the images feel premium.',
+    'hero.entry1.meta': 'Suzhou NanoTech - Brand Marketing',
+    'hero.entry2.greeting': 'Hi, I am',
+    'hero.entry2.title': 'Wang Mingdi - Photographer / Editor',
+    'hero.entry2.subtitle':
+      'Blending an art design background with commercial needs to deliver practical visuals.',
+    'hero.entry2.quote':
+      'He tackles complex shoots on tight schedules while keeping a consistent visual voice.',
+    'hero.entry2.meta': 'Linyi Architectural Design Institute - Project Team',
+    'hero.entry3.greeting': 'Hi, I am',
+    'hero.entry3.title': 'Wang Mingdi - Photographer / Editor',
+    'hero.entry3.subtitle':
+      'Licensed drone pilot offering immersive views of cities and natural landscapes.',
+    'hero.entry3.quote':
+      'Working with Mingdi is smooth; his planning keeps every production efficient.',
+    'hero.entry3.meta': 'Humanoid Robotics Program - Lead',
+    'hero.actions.prev': 'View previous testimonial',
+    'hero.actions.next': 'View next testimonial',
+    'hero.actions.primary': 'View Work',
+    'hero.actions.secondary': 'Contact Me',
+    'profile.title': 'Profile Card',
+    'profile.lead': 'Get a quick look at my style, focus areas, and collaboration details.',
+    'profile.cta': 'Start a Project',
+    'profile.avatar.alt': 'Portrait of Wang Mingdi',
+    'profile.name': 'Wang Mingdi',
+    'profile.bio':
+      'Visual creator with an art design background. Projects cover architecture, manufacturing, brand storytelling, and character documentaries. Licensed CAAC drone pilot delivering end-to-end production.',
+    'profile.tags.space': 'Spatial Narrative',
+    'profile.tags.industry': 'Industrial Visuals',
+    'profile.tags.aerial': 'Aerial',
+    'profile.tags.brand': 'Brand Imagery',
+    'profile.location.label': 'Based In',
+    'profile.location.value': 'Suzhou, China',
+    'profile.email.label': 'Email',
+    'profile.services.label': 'Services',
+    'profile.services.value': 'Promo films, spatial photography, brand shorts, post production',
+    'profile.current.label': 'Currently Working On',
+    'profile.current.value': 'Smart manufacturing documentary - Architectural visual archive',
+    'gallery.title': 'Photography Portfolio',
+    'gallery.lead': 'Selected spatial and portrait projects that highlight mood and detail.',
+    'gallery.cta': 'Continue to Video',
+    'gallery.item1.caption': 'Quiet Sense - Museum visual campaign',
+    'gallery.item1.alt': 'Modern museum hall with ambient lighting',
+    'gallery.item1.title': 'Quiet Sense - Museum Visual Campaign',
+    'gallery.item2.caption': 'Heart of Manufacturing - Smart factory documentary',
+    'gallery.item2.alt': 'Robotic arm working inside a factory',
+    'gallery.item2.title': 'Heart of Manufacturing - Smart Factory Documentary',
+    'gallery.item3.caption': 'City of Light - Night aerial architecture',
+    'gallery.item3.alt': 'City skyline glowing at night',
+    'gallery.item3.title': 'City of Light - Nighttime Aerial Series',
+    'gallery.item4.caption': 'Everyday Moments - Lifestyle brand campaign',
+    'gallery.item4.alt': 'Lifestyle coffee shop interior',
+    'gallery.item4.title': 'Everyday Moments - Lifestyle Brand Campaign',
+    'gallery.item5.caption': 'Profiles in Light - Interview series',
+    'gallery.item5.alt': 'Cinematic portrait with rim lighting',
+    'gallery.item5.title': 'Profiles in Light - Interview Series',
+    'gallery.item6.caption': 'Future Lab - Technology exhibition coverage',
+    'gallery.item6.alt': 'Interactive technology installation on stage',
+    'gallery.item6.title': 'Future Lab - Technology Exhibition Coverage',
+    'video.title': 'Video Portfolio',
+    'video.lead': 'Directing and editing highlights that show narrative pace and color control.',
+    'video.cta': 'Request the full reel',
+    'video.item1.title': '01:00 AM Office - Brand Story Film',
+    'video.item1.body':
+      'A moody short for a furniture brand, using night office scenes to stress ambience and product detail.',
+    'video.item1.point1': 'Direction / Cinematography / Color',
+    'video.item1.point2': 'Style: Narrative mood + spatial staging',
+    'video.item2.title': 'Flowing Light - Spatial Art Documentary',
+    'video.item2.body':
+      'Captures an immersive art show with slow motion and aerials, highlighting the dialogue between light and visitors.',
+    'video.item2.point1': 'Direction / Aerials / Post production',
+    'video.item2.point2': 'Style: Documentary coverage + motion',
+    'video.item3.title': 'Future Manufacturing - Corporate Documentary',
+    'video.item3.body':
+      'Weaves interviews with production scenes to underline technology strengths and human warmth.',
+    'video.item3.point1': 'Direction / Cinematography / Interview design',
+    'video.item3.point2': 'Style: Corporate documentary + interviews',
+    'video.fallback': 'Your browser does not support video playback.',
+    'contact.title': 'Let us create your next visual story',
+    'contact.lead':
+      'Whether you are a brand team, spatial designer, or innovation group, share your brief and I will craft a balanced visual plan.',
+    'contact.cta': 'Email Me',
+    'contact.phone': 'Phone: +86 193-1434-5676',
+    'contact.wechat': 'WeChat: wangmingdi_visual',
+    'contact.location': 'Based in Suzhou - Available nationwide',
+    'form.success': 'Form submitted. I will reply soon!',
+    'lightbox.dialogAria': 'Image preview',
+    'lightbox.close': 'Close',
+    'lightbox.prev': 'Previous image',
+    'lightbox.next': 'Next image',
+    'footer.copy': '\u00A9 2025 Wang Mingdi. All rights reserved.',
+    'footer.gallery': 'Portfolio',
+    'footer.contact': 'Business Inquiries',
+    'footer.backToTop': 'Back to Top',
+  },
+};
+
+let hasCapturedDefaultTranslations = false;
+
+function captureDefaultTranslations() {
+  if (hasCapturedDefaultTranslations) {
+    return;
+  }
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    const key = element.dataset.i18n;
+    if (!key || translations.zh[key]) return;
+    translations.zh[key] = element.textContent.trim();
+  });
+
+  document.querySelectorAll('[data-i18n-attr]').forEach((element) => {
+    const entries = element.dataset.i18nAttr;
+    if (!entries) return;
+
+    entries
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .forEach((entry) => {
+        const parts = entry.split(':').map((value) => value.trim());
+        const attrName = parts[0];
+        const key = parts[1];
+        if (!attrName || !key || translations.zh[key]) return;
+        const value = element.getAttribute(attrName);
+        if (value !== null) {
+          translations.zh[key] = value;
+        }
+      });
+  });
+
+  if (!translations.zh['theme.text.night']) {
+    translations.zh['theme.text.night'] = '\u591C\u95F4\u6A21\u5F0F';
+  }
+
+  hasCapturedDefaultTranslations = true;
+}
+
+function getTranslation(key, lang = state.language) {
+  if (!key) return '';
+  const langDict = translations[lang];
+  if (langDict && Object.prototype.hasOwnProperty.call(langDict, key)) {
+    return langDict[key];
+  }
+  const zhDict = translations.zh;
+  if (zhDict && Object.prototype.hasOwnProperty.call(zhDict, key)) {
+    return zhDict[key];
+  }
+  return '';
+}
+
+function applyTranslations(lang) {
+  const targetLang = lang === 'en' ? 'en' : 'zh';
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    const key = element.dataset.i18n;
+    const translation = getTranslation(key, targetLang);
+    if (translation) {
+      element.textContent = translation;
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-attr]').forEach((element) => {
+    const entries = element.dataset.i18nAttr;
+    if (!entries) return;
+
+    entries
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .forEach((entry) => {
+        const parts = entry.split(':').map((value) => value.trim());
+        const attrName = parts[0];
+        const key = parts[1];
+        if (!attrName || !key) return;
+        const translation = getTranslation(key, targetLang);
+        if (translation) {
+          element.setAttribute(attrName, translation);
+        }
+      });
+  });
+
+  updateThemeToggleUI(state.theme);
+}
+
+function updateLanguageToggleUI(lang) {
+  if (!languageToggle) return;
+  languageToggle.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+}
+
+function applyLanguage(lang) {
+  captureDefaultTranslations();
+  const normalized = lang === 'en' ? 'en' : 'zh';
+  state.language = normalized;
+  localStorage.setItem('language', normalized);
+  html.setAttribute('lang', normalized === 'en' ? 'en' : 'zh-CN');
+  const title = getTranslation('meta.title', normalized);
+  if (title) {
+    document.title = title;
+  }
+  applyTranslations(normalized);
+  updateLanguageToggleUI(normalized);
+}
+
+function toggleLanguage() {
+  const nextLanguage = state.language === 'zh' ? 'en' : 'zh';
+  applyLanguage(nextLanguage);
+}
 
 const nightSkyState = {
   container: null,
@@ -196,12 +437,36 @@ function updateNightSky(theme) {
   }
 }
 
+function updateThemeToggleUI(theme) {
+  if (!themeToggle) return;
+
+  const iconSpan = themeToggle.querySelector('.theme-toggle__icon');
+  const textSpan = themeToggle.querySelector('.theme-toggle__text');
+  const labels = {
+    light: themeToggle.dataset.themeLabelLight || '\u5207\u6362\u81F3\u591C\u95F4\u6A21\u5F0F',
+    dark: themeToggle.dataset.themeLabelDark || '\u5207\u6362\u81F3\u65E5\u95F4\u6A21\u5F0F',
+  };
+
+  themeToggle.setAttribute('aria-label', theme === 'dark' ? labels.dark : labels.light);
+  themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+  themeToggle.dataset.theme = theme;
+
+  if (iconSpan) {
+    iconSpan.innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
+  }
+
+  if (textSpan) {
+    const textKey = theme === 'dark' ? 'theme.text.day' : 'theme.text.night';
+    textSpan.textContent =
+      getTranslation(textKey) ||
+      (theme === 'dark' ? '\u65E5\u95F4\u6A21\u5F0F' : '\u591C\u95F4\u6A21\u5F0F');
+  }
+}
+
 function applyTheme(theme) {
   state.theme = theme;
   root.dataset.theme = theme;
-  if (themeToggle) {
-    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-  }
+  updateThemeToggleUI(theme);
   localStorage.setItem('theme', theme);
   updateNightSky(theme);
 }
@@ -266,15 +531,19 @@ function filterProjects(category) {
     activeTrigger = null;
   }
 
-  return errors;
-
+function validateForm() {
+  return [];
+}
 
 function handleFormSubmit(event) {
   event.preventDefault();
-  if (!contactForm || !formStatus) {
+  if (!contactForm) {
     return;
   }
-  const formData = new FormData(contactForm);
+
+  const targetForm = event.currentTarget || contactForm;
+  const status = targetForm.querySelector('[data-form-status]') || formStatus;
+  const formData = new FormData(targetForm);
   const errors = validateForm(formData);
 
   if (errors.length > 0) {
@@ -286,7 +555,7 @@ function handleFormSubmit(event) {
   }
 
   if (status) {
-    status.textContent = '表单已提交，我们会尽快回复您！';
+    status.textContent = getTranslation('form.success') || '\u8868\u5355\u5DF2\u63D0\u4EA4\uFF0C\u6211\u4EEC\u4F1A\u5C3D\u5FEB\u56DE\u590D\u60A8\uFF01';
     status.dataset.state = 'success';
   }
   targetForm.reset();
@@ -424,7 +693,11 @@ function initAnimatedTestimonials() {
 }
 
 function init() {
+  applyLanguage(state.language);
   applyTheme(state.theme);
+  if (languageToggle) {
+    languageToggle.addEventListener('click', toggleLanguage);
+  }
   if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
   }
