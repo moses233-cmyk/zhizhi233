@@ -17,12 +17,26 @@
     <header class="site-header" id="home">
       <nav class="navbar">
         <a class="navbar__brand" href="#home">Wang Mingdi</a>
-        <ul class="navbar__links">
-          <li><a href="#profile">个人卡片</a></li>
-          <li><a href="#gallery">图片作品</a></li>
-          <li><a href="#video">视频作品</a></li>
-          <li><a href="#contact">联系我</a></li>
-        </ul>
+        <div class="navbar__actions">
+          <ul class="navbar__links">
+            <li><a href="#profile">个人卡片</a></li>
+            <li><a href="#gallery">图片作品</a></li>
+            <li><a href="#video">视频作品</a></li>
+            <li><a href="#contact">联系我</a></li>
+          </ul>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="切换至夜间模式"
+            aria-pressed="false"
+            data-theme-label-light="切换至夜间模式"
+            data-theme-label-dark="切换至日间模式"
+          >
+            <span class="theme-toggle__icon" aria-hidden="true">&#127769;</span>
+            <span class="theme-toggle__text">夜间模式</span>
+          </button>
+        </div>
       </nav>
 
       <!-- 首屏 -->

@@ -196,12 +196,33 @@ function updateNightSky(theme) {
   }
 }
 
+function updateThemeToggleUI(theme) {
+  if (!themeToggle) return;
+
+  const iconSpan = themeToggle.querySelector('.theme-toggle__icon');
+  const textSpan = themeToggle.querySelector('.theme-toggle__text');
+  const labels = {
+    light: themeToggle.dataset.themeLabelLight || '切换至夜间模式',
+    dark: themeToggle.dataset.themeLabelDark || '切换至日间模式',
+  };
+
+  themeToggle.setAttribute('aria-label', theme === 'dark' ? labels.dark : labels.light);
+  themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+  themeToggle.dataset.theme = theme;
+
+  if (iconSpan) {
+    iconSpan.innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
+  }
+
+  if (textSpan) {
+    textSpan.textContent = theme === 'dark' ? '日间模式' : '夜间模式';
+  }
+}
+
 function applyTheme(theme) {
   state.theme = theme;
   root.dataset.theme = theme;
-  if (themeToggle) {
-    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-  }
+  updateThemeToggleUI(theme);
   localStorage.setItem('theme', theme);
   updateNightSky(theme);
 }
