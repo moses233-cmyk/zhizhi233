@@ -1,16 +1,36 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const galleryLinks = Array.from(document.querySelectorAll('.gallery-link'));
-  const lightbox = document.querySelector('#lightbox');
-  const lightboxImage = document.querySelector('#lightbox-image');
-  const lightboxCaption = document.querySelector('#lightbox-caption');
-  const lightboxDialog = lightbox?.querySelector('.lightbox__dialog');
-  const prevButton = lightbox?.querySelector('.lightbox__nav--prev');
-  const nextButton = lightbox?.querySelector('.lightbox__nav--next');
-  const closeTriggers = lightbox ? Array.from(lightbox.querySelectorAll('[data-lightbox-close]')) : [];
+const state = {
+  theme: localStorage.getItem('theme') || 'light',
+};
 
-  if (!galleryLinks.length || !lightbox || !lightboxImage || !lightboxCaption) {
-    return;
+const root = document.body;
+const themeToggle = document.querySelector('#theme-toggle');
+const filterButtons = Array.from(document.querySelectorAll('.filter-btn'));
+const projectCards = Array.from(document.querySelectorAll('.project-card'));
+const contactForm = document.querySelector('#contact-form');
+const currentYear = document.querySelector('#current-year');
+const testimonialCard = document.querySelector('[data-component="animated-testimonials"]');
+
+function applyTheme(theme) {
+  state.theme = theme;
+  root.dataset.theme = theme;
+  if (themeToggle) {
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
   }
+  localStorage.setItem('theme', theme);
+}
+
+function toggleTheme() {
+  const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(nextTheme);
+}
+
+function filterProjects(category) {
+  projectCards.forEach((card) => {
+    const matches = category === 'all' || card.dataset.category === category;
+    card.hidden = !matches;
+    card.setAttribute('aria-hidden', String(!matches));
+  });
+}
 
   const galleryItems = galleryLinks.map((link, index) => {
     const image = link.querySelector('img');
@@ -59,15 +79,30 @@ document.addEventListener('DOMContentLoaded', () => {
     activeTrigger = null;
   }
 
-  function showNext() {
-    const nextIndex = (currentIndex + 1) % galleryItems.length;
-    updateLightbox(nextIndex);
+  return errors;
+
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  const targetForm = event.currentTarget;
+  const status = targetForm.querySelector('.form-status');
+  const formData = new FormData(targetForm);
+  const errors = validateForm(formData);
+
+  if (errors.length > 0) {
+    if (status) {
+      status.textContent = errors.join(' ');
+      status.dataset.state = 'error';
+    }
+    return;
   }
 
-  function showPrevious() {
-    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-    updateLightbox(prevIndex);
+  if (status) {
+    status.textContent = '表单已提交，我们会尽快回复您！';
+    status.dataset.state = 'success';
   }
+  targetForm.reset();
+}
 
   galleryItems.forEach((item, index) => {
     item.link.addEventListener('click', (event) => {
@@ -128,4 +163,100 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     touchStartX = null;
   });
-});
+
+
+function initAnimatedTestimonials() {
+  if (!testimonialCard) return;
+
+  const images = Array.from(testimonialCard.querySelectorAll('.profile-card__image'));
+  const entries = Array.from(testimonialCard.querySelectorAll('.profile-card__entry'));
+  const buttons = Array.from(testimonialCard.querySelectorAll('.profile-card__button'));
+  const autoplay = testimonialCard.dataset.autoplay === 'true';
+
+  if (entries.length === 0 || images.length === 0) return;
+
+  let activeIndex = 0;
+  let autoplayTimer;
+
+  const setActive = (index) => {
+    activeIndex = (index + entries.length) % entries.length;
+
+    images.forEach((image) => {
+      const isActive = Number(image.dataset.index) === activeIndex;
+      image.classList.toggle('is-active', isActive);
+    });
+
+    entries.forEach((entry) => {
+      const isActive = Number(entry.dataset.index) === activeIndex;
+      entry.classList.toggle('is-active', isActive);
+    });
+  };
+
+  const handleNext = () => setActive(activeIndex + 1);
+  const handlePrev = () => setActive(activeIndex - 1);
+
+  const stopAutoplay = () => {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = undefined;
+    }
+  };
+
+  const startAutoplay = () => {
+    if (!autoplay) return;
+    stopAutoplay();
+    autoplayTimer = setInterval(handleNext, 5000);
+  };
+
+  const restartAutoplay = () => {
+    stopAutoplay();
+    startAutoplay();
+  };
+
+  buttons.forEach((button) => {
+    const action = button.dataset.action;
+    if (action === 'next') {
+      button.addEventListener('click', () => {
+        handleNext();
+        restartAutoplay();
+      });
+    } else if (action === 'prev') {
+      button.addEventListener('click', () => {
+        handlePrev();
+        restartAutoplay();
+      });
+    }
+  });
+
+  testimonialCard.addEventListener('mouseenter', stopAutoplay);
+  testimonialCard.addEventListener('mouseleave', startAutoplay);
+
+  setActive(0);
+  startAutoplay();
+}
+
+function init() {
+  applyTheme(state.theme);
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  filterButtons.forEach((button) => button.addEventListener('click', handleFilterClick));
+  if (projectCards.length > 0) {
+    filterProjects('all');
+  }
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleFormSubmit);
+  }
+  initSmoothScroll();
+  initIntersectionHighlights();
+  initAnimatedTestimonials();
+  if (currentYear) {
+    currentYear.textContent = new Date().getFullYear();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

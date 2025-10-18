@@ -25,26 +25,89 @@
         </ul>
       </nav>
 
-      <div class="hero">
-        <div class="hero__text">
-          <span class="hero__tagline">影像导演 · 摄影师 · 剪辑师</span>
-          <h1>用镜头打造空间与品牌的视觉故事</h1>
-          <p>
-            我是一名常驻苏州的影像创作者，擅长空间视觉、工业纪录与品牌宣传影片的策划与执行。
-            我喜欢把抽象的品牌理念，转化成有温度的画面，让作品既具美感又能传递价值。
-          </p>
-          <div class="hero__actions">
-            <a class="btn btn--primary" href="#gallery">浏览作品集</a>
-            <a class="btn" href="#contact">预约创作</a>
+      <!-- 首屏 -->
+      <section class="hero" aria-label="个人名片与客户评价">
+        <div
+          class="profile-card"
+          data-component="animated-testimonials"
+          data-autoplay="true"
+        >
+          <div class="profile-card__media">
+            <div class="profile-card__stack" aria-hidden="true">
+              <figure class="profile-card__image is-active" data-index="0">
+                <img src="assets/me.jpg" alt="王鸣笛摄影作品集锦" loading="lazy" />
+              </figure>
+              <figure class="profile-card__image" data-index="1">
+                <img src="assets/me.jpg" alt="王鸣笛在棚内布光场景" loading="lazy" />
+              </figure>
+              <figure class="profile-card__image" data-index="2">
+                <img src="assets/me.jpg" alt="王鸣笛外景拍摄实况" loading="lazy" />
+              </figure>
+            </div>
+          </div>
+          <div class="profile-card__content">
+            <article class="profile-card__entry is-active" data-index="0">
+              <header class="profile-card__header">
+                <p class="profile-card__greeting">你好，我是</p>
+                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
+                <p class="profile-card__subtitle">
+                  专注空间、建筑与人像影像创作，擅长用镜头构建品牌视觉故事。
+                </p>
+              </header>
+              <blockquote class="profile-card__quote" aria-live="polite">
+                “鸣笛的镜头让我们的空间焕发生命力，从拍摄到成片都极具质感。”
+              </blockquote>
+              <p class="profile-card__meta">—— 苏州微纳纳米科技 · 品牌市场部</p>
+            </article>
+            <article class="profile-card__entry" data-index="1">
+              <header class="profile-card__header">
+                <p class="profile-card__greeting">你好，我是</p>
+                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
+                <p class="profile-card__subtitle">
+                  将艺术设计背景与商业需求结合，打造可落地的影像解决方案。
+                </p>
+              </header>
+              <blockquote class="profile-card__quote" aria-live="polite">
+                “他总能在有限时间内完成复杂拍摄任务，并保持影像风格的统一。”
+              </blockquote>
+              <p class="profile-card__meta">—— 临沂市建筑设计研究院 · 项目组</p>
+            </article>
+            <article class="profile-card__entry" data-index="2">
+              <header class="profile-card__header">
+                <p class="profile-card__greeting">你好，我是</p>
+                <h1 class="profile-card__title">王鸣笛 · 摄影师 / 剪辑师</h1>
+                <p class="profile-card__subtitle">
+                  无人机航拍持证摄影师，为城市与自然提供沉浸式视觉记录。
+                </p>
+              </header>
+              <blockquote class="profile-card__quote" aria-live="polite">
+                “与鸣笛合作是一次快体验，他的脚本规划让拍摄流程顺畅高效。”
+              </blockquote>
+              <p class="profile-card__meta">—— 人形机器人项目 · 负责人</p>
+            </article>
+            <div class="profile-card__actions">
+              <button
+                class="profile-card__button"
+                type="button"
+                data-action="prev"
+                aria-label="查看上一条评价"
+              >
+                <span aria-hidden="true">←</span>
+              </button>
+              <button
+                class="profile-card__button"
+                type="button"
+                data-action="next"
+                aria-label="查看下一条评价"
+              >
+                <span aria-hidden="true">→</span>
+              </button>
+              <a class="btn btn--primary" href="#projects">浏览作品</a>
+              <a class="btn" href="#contact">联系我</a>
+            </div>
           </div>
         </div>
-        <figure class="hero__portrait">
-          <img
-            src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=900&q=80"
-            alt="王鸣笛的创作肖像"
-          />
-        </figure>
-      </div>
+      </section>
     </header>
 
     <main>
