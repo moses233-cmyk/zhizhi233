@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>相册预览</title>
+    <meta name="description" content="精选相册图片预览" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="album.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js" defer></script>
+    <script src="album.js" defer></script>
+  </head>
+  <body>
+    <div class="preloader" role="status" aria-live="polite">
+      <div class="preloader-counter">0</div>
+    </div>
+
+    <header class="album-header">
+      <a class="album-back" href="index.html#gallery">← 返回作品集</a>
+      <div class="album-header__meta">
+        <p class="album-breadcrumb">相册</p>
+        <h1 class="album-title" data-album-title>正在加载相册…</h1>
+        <p class="album-description" data-album-description></p>
+        <p class="album-count" data-album-count></p>
+      </div>
+    </header>
+
+    <main class="album-view" id="album-view">
+      <div class="container" aria-hidden="true">
+        <div class="grid-container">
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+
+      <div class="slider-image" id="slider-image"></div>
+      <div class="slider-image-bg" id="slider-image-bg"></div>
+      <div class="slider-image-next" id="slider-image-next"></div>
+      <div class="transition-overlay" id="transition-overlay"></div>
+
+      <section class="content" id="content" aria-live="polite">
+        <h2 class="content-title"><span></span></h2>
+        <p class="content-paragraph" id="content-paragraph"></p>
+      </section>
+
+      <div class="thumbnails" id="thumbnails"></div>
+
+      <div class="switch" id="switch" role="group" aria-label="切换布局">
+        <button class="switch-button switch-button-grid switch-button-current" type="button">
+          <span class="indicator-dot" aria-hidden="true"></span>
+          网格
+        </button>
+        <button class="switch-button switch-button-slider" type="button">
+          <span class="indicator-dot" aria-hidden="true"></span>
+          幻灯片
+        </button>
+      </div>
+    </main>
+
+    <section class="album-message" id="album-message" hidden></section>
+  </body>
+</html>

@@ -1651,6 +1651,24 @@ body[data-theme='dark'] .footer {
   color: rgba(255, 255, 255, 0.78);
 }
 
+.album-stack__frame-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.album-stack__frame-link:focus-visible .album-stack__item--primary {
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+.album-stack__frame-link:focus-visible .album-stack__item--primary::after {
+  opacity: 1;
+  box-shadow:
+    0 0 32px rgba(56, 189, 248, 0.3),
+    0 0 22px rgba(147, 51, 234, 0.32);
+  transform: scale(1.04);
+}
+
 .album-stack__item:hover .album-stack__overlay,
 .album-stack__item:focus-visible .album-stack__overlay {
   opacity: 0;

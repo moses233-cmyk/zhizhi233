@@ -168,25 +168,34 @@ function renderImages(images, albumOrder) {
     const stack = document.createElement('div');
     stack.className = 'album-stack__stack';
 
+    const isAlbum = Boolean(group.id);
     const maxPreview = 4;
-    group.images.forEach((item, index) => {
-      const link = document.createElement('a');
-      link.className = 'gallery-link album-stack__item';
-      link.href = item.url;
-      link.dataset.full = item.url;
-      link.dataset.caption =
-        item.description ||
-        item.title ||
-        `${group.title} · 媒体图片`;
 
-      link.style.setProperty('--stack-offset', Math.min(index, maxPreview - 1));
+    group.images.forEach((item, index) => {
+      const elementTag = isAlbum ? 'div' : 'a';
+      const itemElement = document.createElement(elementTag);
+      itemElement.className = 'album-stack__item';
+
+      if (isAlbum) {
+        itemElement.setAttribute('aria-hidden', 'true');
+      } else {
+        itemElement.classList.add('gallery-link');
+        itemElement.href = item.url;
+        itemElement.dataset.full = item.url;
+        itemElement.dataset.caption =
+          item.description ||
+          item.title ||
+          `${group.title} · 媒体图片`;
+      }
+
+      itemElement.style.setProperty('--stack-offset', Math.min(index, maxPreview - 1));
 
       if (index === 0) {
-        link.classList.add('album-stack__item--primary');
+        itemElement.classList.add('album-stack__item--primary');
       } else if (index < maxPreview) {
-        link.classList.add('album-stack__item--visible');
+        itemElement.classList.add('album-stack__item--visible');
       } else {
-        link.classList.add('album-stack__item--hidden');
+        itemElement.classList.add('album-stack__item--hidden');
       }
 
       const img = document.createElement('img');
@@ -194,7 +203,7 @@ function renderImages(images, albumOrder) {
       img.alt = item.title || item.description || `${group.title} 图片`;
       img.loading = 'lazy';
 
-      link.appendChild(img);
+      itemElement.appendChild(img);
 
       const overlay = document.createElement('div');
       overlay.className = 'album-stack__overlay';
@@ -216,11 +225,21 @@ function renderImages(images, albumOrder) {
         overlay.appendChild(overlayMeta);
       }
 
-      link.appendChild(overlay);
-      stack.appendChild(link);
+      itemElement.appendChild(overlay);
+      stack.appendChild(itemElement);
     });
 
-    frame.appendChild(stack);
+    if (isAlbum) {
+      const link = document.createElement('a');
+      link.className = 'album-stack__frame-link';
+      link.href = `album.html?id=${encodeURIComponent(group.id)}`;
+      link.setAttribute('aria-label', `查看相册「${group.title || '未命名相册'}」`);
+      link.appendChild(stack);
+      frame.appendChild(link);
+    } else {
+      frame.appendChild(stack);
+    }
+
     section.appendChild(frame);
     fragment.appendChild(section);
   });
