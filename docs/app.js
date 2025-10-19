@@ -566,35 +566,67 @@ function initIntersectionHighlights() {
   sections.forEach((section) => observer.observe(section));
 }
 
-function validateForm() {
-  return [];
-}
+function initGalleryLightbox() {
+  if (!galleryLinks.length || !lightbox || !lightboxImage || !lightboxCaption) return;
 
-function handleFormSubmit(event) {
-  event.preventDefault();
-  if (!contactForm) {
-    return;
-  }
+  const galleryItems = galleryLinks.map((link, index) => {
+    const image = link.querySelector('img');
+    const full = link.dataset.full || link.getAttribute('href');
+    const caption =
+      link.dataset.caption ||
+      image?.getAttribute('alt') ||
+      link.nextElementSibling?.textContent?.trim() ||
+      '';
 
-  const targetForm = event.currentTarget || contactForm;
-  const status = targetForm.querySelector('[data-form-status]') || formStatus;
-  const formData = new FormData(targetForm);
-  const errors = validateForm(formData);
+    link.setAttribute('role', 'button');
+    link.setAttribute('aria-haspopup', 'dialog');
+    link.setAttribute('aria-controls', 'lightbox');
+    link.setAttribute('data-gallery-index', String(index));
 
-  if (errors.length > 0) {
-    if (status) {
-      status.textContent = errors.join(' ');
-      status.dataset.state = 'error';
-    }
-    return;
-  }
+    return { link, full, caption, alt: image?.getAttribute('alt') || caption };
+  });
 
-  if (status) {
-    status.textContent = getTranslation('form.success') || '\u8868\u5355\u5DF2\u63D0\u4EA4\uFF0C\u6211\u4EEC\u4F1A\u5C3D\u5FEB\u56DE\u590D\u60A8\uFF01';
-    status.dataset.state = 'success';
-  }
-  targetForm.reset();
-}
+  let currentIndex = 0;
+  let activeTrigger = null;
+  let touchStartX = null;
+
+  const updateLightbox = (index) => {
+    const item = galleryItems[index];
+    if (!item) return;
+
+    currentIndex = index;
+    lightboxImage.src = item.full;
+    lightboxImage.alt = item.alt || item.caption;
+    lightboxCaption.textContent = item.caption;
+  };
+
+  const showNext = () => {
+    if (!galleryItems.length) return;
+    const nextIndex = (currentIndex + 1) % galleryItems.length;
+    updateLightbox(nextIndex);
+  };
+
+  const showPrevious = () => {
+    if (!galleryItems.length) return;
+    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+    updateLightbox(prevIndex);
+  };
+
+  const openLightbox = (index, trigger) => {
+    updateLightbox(index);
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('lightbox-open');
+    activeTrigger = trigger ?? galleryItems[index]?.link ?? null;
+    lightboxDialog?.focus({ preventScroll: true });
+  };
+
+  const closeLightbox = () => {
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('lightbox-open');
+    lightboxImage.src = '';
+    activeTrigger?.focus({ preventScroll: true });
+    activeTrigger = null;
+  };
 
   galleryItems.forEach((item, index) => {
     item.link.addEventListener('click', (event) => {
@@ -657,6 +689,35 @@ function handleFormSubmit(event) {
   });
 }
 
+function validateForm() {
+  return [];
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  if (!contactForm) {
+    return;
+  }
+
+  const targetForm = event.currentTarget || contactForm;
+  const status = targetForm.querySelector('[data-form-status]') || formStatus;
+  const formData = new FormData(targetForm);
+  const errors = validateForm(formData);
+
+  if (errors.length > 0) {
+    if (status) {
+      status.textContent = errors.join(' ');
+      status.dataset.state = 'error';
+    }
+    return;
+  }
+
+  if (status) {
+    status.textContent = getTranslation('form.success') || '\u8868\u5355\u5DF2\u63D0\u4EA4\uFF0C\u6211\u4EEC\u4F1A\u5C3D\u5FEB\u56DE\u590D\u60A8\uFF01';
+    status.dataset.state = 'success';
+  }
+  targetForm.reset();
+}
 function initAnimatedTestimonials() {
   if (!testimonialCard) return;
 
@@ -741,6 +802,7 @@ function init() {
   }
   initSmoothScroll();
   initIntersectionHighlights();
+  initGalleryLightbox();
   if (currentYear) {
     currentYear.textContent = new Date().getFullYear();
   }
