@@ -521,65 +521,50 @@ function filterProjects(category) {
   });
 }
 
-if (galleryLinks.length && lightbox && lightboxImage && lightboxCaption) {
-  const galleryItems = galleryLinks.map((link, index) => {
-    const image = link.querySelector('img');
-    const full = link.dataset.full || link.getAttribute('href');
-    const caption =
-      link.dataset.caption ||
-      image?.getAttribute('alt') ||
-      link.nextElementSibling?.textContent?.trim() ||
-      '';
+function initSmoothScroll() {
+  const links = Array.from(document.querySelectorAll('a[href^="#"]'));
+  if (!links.length) return;
 
-    link.setAttribute('role', 'button');
-    link.setAttribute('aria-haspopup', 'dialog');
-    link.setAttribute('aria-controls', 'lightbox');
-    link.setAttribute('data-gallery-index', String(index));
-
-    return { link, full, caption, alt: image?.getAttribute('alt') || caption };
+  links.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const target = link.getAttribute('href');
+      if (!target || target === '#' || target.startsWith('mailto:')) return;
+      const destination = document.querySelector(target);
+      if (!destination) return;
+      event.preventDefault();
+      destination.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
+}
 
-  let currentIndex = 0;
-  let activeTrigger = null;
-  let touchStartX = null;
+function initIntersectionHighlights() {
+  if (typeof IntersectionObserver === 'undefined') return;
+  const sections = Array.from(document.querySelectorAll('main section[id]'));
+  const navLinks = Array.from(
+    document.querySelectorAll('.navbar__links a[href^="#"], .footer__links a[href^="#"]')
+  );
 
-  function updateLightbox(index) {
-    const item = galleryItems[index];
-    if (!item) return;
+  if (!sections.length || !navLinks.length) return;
 
-    currentIndex = index;
-    lightboxImage.src = item.full;
-    lightboxImage.alt = item.alt || item.caption;
-    lightboxCaption.textContent = item.caption;
-  }
+  const map = new Map(navLinks.map((link) => [link.getAttribute('href'), link]));
 
-  function openLightbox(index, trigger) {
-    updateLightbox(index);
-    lightbox.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('lightbox-open');
-    activeTrigger = trigger ?? galleryItems[index]?.link ?? null;
-    lightboxDialog?.focus({ preventScroll: true });
-  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const id = `#${entry.target.id}`;
+        const link = map.get(id);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          navLinks.forEach((item) => item.classList.remove('is-active'));
+          link.classList.add('is-active');
+        }
+      });
+    },
+    { rootMargin: '-40% 0px -40% 0px', threshold: 0.2 }
+  );
 
-  function closeLightbox() {
-    lightbox.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('lightbox-open');
-    lightboxImage.src = '';
-    activeTrigger?.focus({ preventScroll: true });
-    activeTrigger = null;
-  }
-
-  const showNext = () => {
-    if (!galleryItems.length) return;
-    const nextIndex = (currentIndex + 1) % galleryItems.length;
-    updateLightbox(nextIndex);
-  };
-
-  const showPrevious = () => {
-    if (!galleryItems.length) return;
-    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-    updateLightbox(prevIndex);
-  };
+  sections.forEach((section) => observer.observe(section));
+}
 
 function validateForm() {
   return [];
