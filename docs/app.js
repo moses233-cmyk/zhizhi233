@@ -803,6 +803,7 @@ function init() {
   initSmoothScroll();
   initIntersectionHighlights();
   initGalleryLightbox();
+  initAnimatedTestimonials();
   bindVideoTitleInteraction();
   if (currentYear) {
     currentYear.textContent = new Date().getFullYear();
