@@ -13,6 +13,17 @@ const contactForm = document.querySelector('#contact-form');
 const formStatus = contactForm ? contactForm.querySelector('[data-form-status]') : null;
 const currentYear = document.querySelector('#current-year');
 const testimonialCard = document.querySelector('[data-component="animated-testimonials"]');
+const galleryLinks = Array.from(document.querySelectorAll('.gallery-link'));
+const lightbox = document.querySelector('.lightbox');
+const lightboxDialog = lightbox ? lightbox.querySelector('.lightbox__dialog') : null;
+const lightboxImage = lightbox ? lightbox.querySelector('#lightbox-image') : null;
+const lightboxCaption = lightbox ? lightbox.querySelector('#lightbox-caption') : null;
+const closeTriggers = lightbox
+  ? Array.from(lightbox.querySelectorAll('[data-lightbox-close]'))
+  : [];
+const prevButton = lightbox ? lightbox.querySelector('.lightbox__nav--prev') : null;
+const nextButton = lightbox ? lightbox.querySelector('.lightbox__nav--next') : null;
+
 
 const translations = {
   zh: {
@@ -229,7 +240,22 @@ function applyTranslations(lang) {
 
 function updateLanguageToggleUI(lang) {
   if (!languageToggle) return;
-  languageToggle.setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+  const isEnglish = lang === 'en';
+  languageToggle.setAttribute('aria-pressed', isEnglish ? 'true' : 'false');
+
+  const labelSpan = languageToggle.querySelector('.language-toggle__label');
+  const labelText =
+    getTranslation('language.toggleLabel', lang) || (isEnglish ? '\u4E2D\u6587' : 'English');
+  if (labelSpan) {
+    labelSpan.textContent = labelText;
+  } else {
+    languageToggle.textContent = labelText;
+  }
+
+  const ariaLabel =
+    getTranslation('language.toggleAria', lang) ||
+    (isEnglish ? '\u5207\u6362\u5230\u4E2D\u6587' : 'Switch to English');
+  languageToggle.setAttribute('aria-label', ariaLabel);
 }
 
 function applyLanguage(lang) {
@@ -249,6 +275,17 @@ function applyLanguage(lang) {
 function toggleLanguage() {
   const nextLanguage = state.language === 'zh' ? 'en' : 'zh';
   applyLanguage(nextLanguage);
+}
+
+function bindLanguageToggle() {
+  if (!languageToggle || languageToggle.dataset.bound === 'true') return;
+
+  languageToggle.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggleLanguage();
+  });
+
+  languageToggle.dataset.bound = 'true';
 }
 
 const nightSkyState = {
@@ -484,6 +521,7 @@ function filterProjects(category) {
   });
 }
 
+if (galleryLinks.length && lightbox && lightboxImage && lightboxCaption) {
   const galleryItems = galleryLinks.map((link, index) => {
     const image = link.querySelector('img');
     const full = link.dataset.full || link.getAttribute('href');
@@ -530,6 +568,18 @@ function filterProjects(category) {
     activeTrigger?.focus({ preventScroll: true });
     activeTrigger = null;
   }
+
+  const showNext = () => {
+    if (!galleryItems.length) return;
+    const nextIndex = (currentIndex + 1) % galleryItems.length;
+    updateLightbox(nextIndex);
+  };
+
+  const showPrevious = () => {
+    if (!galleryItems.length) return;
+    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+    updateLightbox(prevIndex);
+  };
 
 function validateForm() {
   return [];
@@ -620,7 +670,7 @@ function handleFormSubmit(event) {
     }
     touchStartX = null;
   });
-
+}
 
 function initAnimatedTestimonials() {
   if (!testimonialCard) return;
@@ -695,9 +745,7 @@ function initAnimatedTestimonials() {
 function init() {
   applyLanguage(state.language);
   applyTheme(state.theme);
-  if (languageToggle) {
-    languageToggle.addEventListener('click', toggleLanguage);
-  }
+  bindLanguageToggle();
   if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
   }
