@@ -31,13 +31,18 @@
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background: transparent;
+  background-color: transparent;
   color: var(--color-text);
   font-family: var(--font-sans);
   line-height: 1.7;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+}
+
+main {
+  background: transparent;
 }
 
 .night-sky-background {
@@ -83,12 +88,7 @@ ul {
 }
 
 .site-header {
-  background: linear-gradient(
-    125deg,
-    rgba(41, 74, 255, 0.1) 0%,
-    rgba(103, 134, 255, 0.08) 40%,
-    rgba(255, 255, 255, 0.7) 100%
-  );
+  background: transparent;
   padding: 32px clamp(24px, 6vw, 120px) 64px;
   position: relative;
   overflow: hidden;
@@ -105,11 +105,7 @@ ul {
   content: "";
   position: absolute;
   inset: -120px -160px -200px;
-  background:
-    radial-gradient(60% 60% at 20% 10%, rgba(99, 102, 241, 0.3), transparent 65%),
-    radial-gradient(55% 55% at 80% 10%, rgba(236, 72, 153, 0.22), transparent 60%);
-  filter: blur(80px);
-  opacity: 0.65;
+  background: none;
   pointer-events: none;
 }
 
@@ -590,6 +586,19 @@ background-clip: text;           /* ✅ 标准属性 */
     justify-items: stretch;
   }
 
+  .wave-divider {
+    width: min(80vw, 580px);
+    margin: 56px auto;
+  }
+
+  .wave-divider__interaction {
+    inset: calc(-1 * clamp(90px, 14vw, 150px)) 0;
+  }
+
+  .wave-divider__svg {
+    inset: calc(-1 * clamp(150px, 24vw, 240px)) 0;
+  }
+
   main {
     padding-bottom: 96px;
   }
@@ -711,6 +720,20 @@ background-clip: text;           /* ✅ 标准属性 */
     justify-items: stretch;
   }
 
+  .wave-divider {
+    width: calc(100% - 48px);
+    margin: 40px auto;
+  }
+
+  .wave-divider__interaction {
+    inset: calc(-1 * clamp(70px, 18vw, 140px)) 0;
+  }
+
+  .wave-divider__svg {
+    inset: calc(-1 * clamp(120px, 28vw, 220px)) 0;
+    height: clamp(140px, 40vw, 240px);
+  }
+
   .contact-card {
     grid-template-columns: minmax(0, 1fr);
     padding: 28px 18px;
@@ -828,16 +851,16 @@ background-clip: text;           /* ✅ 标准属性 */
 
 .section {
   padding: clamp(64px, 12vw, 120px) clamp(24px, 6vw, 120px);
+  background: transparent;
 }
 
 .section--alt {
-  background: var(--color-surface);
+  background: transparent;
 }
 
 .section--accent {
-  background: radial-gradient(circle at top right, rgba(47, 88, 255, 0.16), transparent),
-    #121826;
-  color: #f6f7fb;
+  background: transparent;
+  color: inherit;
 }
 
 .section__header {
@@ -859,8 +882,53 @@ background-clip: text;           /* ✅ 标准属性 */
   max-width: 520px;
 }
 
+.wave-divider {
+  position: relative;
+  width: min(70vw, 720px);
+  margin: clamp(48px, 10vw, 72px) auto;
+  height: 1px;
+  color: rgba(37, 99, 235, 0.4);
+}
+
+.wave-divider__interaction {
+  position: absolute;
+  inset: calc(-1 * clamp(60px, 12vw, 120px)) 0;
+  cursor: pointer;
+  z-index: 1;
+  touch-action: none;
+}
+
+.wave-divider__svg {
+  position: absolute;
+  inset: calc(-1 * clamp(120px, 20vw, 200px)) 0;
+  width: 100%;
+  height: clamp(160px, 28vw, 280px);
+  pointer-events: none;
+  filter: none;
+}
+
+.wave-divider__svg::before,
+.wave-divider__svg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+.wave-divider__path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.9;
+  transition: stroke 0.3s ease;
+}
+
+.wave-divider:hover {
+  color: rgba(79, 70, 229, 0.65);
+}
+
 .section--accent .section__header p {
-  color: rgba(246, 247, 251, 0.8);
+  color: var(--color-text-muted);
 }
 
 .link-arrow {
@@ -962,7 +1030,7 @@ background-clip: text;           /* ✅ 标准属性 */
 }
 
 .gallery-item {
-  background: #fff;
+  background: var(--color-surface);
   padding: 20px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -1177,30 +1245,21 @@ background-clip: text;           /* ✅ 标准属性 */
   opacity: 0.2;
 }
 
-.section--accent .contact-card {
-  background: rgba(18, 24, 38, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: none;
-}
-
 .contact-card {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: clamp(32px, 5vw, 48px);
   padding: clamp(32px, 6vw, 56px);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: transparent;
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
+  color: inherit;
 }
 
 .contact-card p {
   margin-top: 18px;
-  color: var(--color-text-muted);
-}
-
-.section--accent .contact-card p {
-  color: rgba(246, 247, 251, 0.78);
+  color: inherit;
 }
 
 .contact-card__info {
@@ -1217,7 +1276,7 @@ background-clip: text;           /* ✅ 标准属性 */
 
 .footer {
   padding: 32px clamp(24px, 6vw, 120px) 48px;
-  background: #0a1020;
+  background: transparent;
   color: rgba(255, 255, 255, 0.68);
   display: grid;
   gap: 16px;
@@ -1325,25 +1384,28 @@ background-clip: text;           /* ✅ 标准属性 */
 }
 
 body[data-theme='dark'] {
-  --color-bg: rgba(11, 18, 33, 0.6);
-  --color-surface: rgba(17, 27, 47, 0.75);
-  --color-surface-alt: rgba(15, 23, 42, 0.85);
-  --color-text: #e4e4e4;
-  --color-text-muted: rgba(226, 232, 240, 0.75);
-  --color-accent: #8b5cf6;
-  --color-accent-muted: rgba(139, 92, 246, 0.18);
-  --color-border: rgba(148, 163, 184, 0.28);
-  background: radial-gradient(circle at 30% 20%, #1b1528 0%, #0e0b16 100%);
+  --color-bg: #050713;
+  --color-surface: rgba(12, 16, 28, 0.85);
+  --color-surface-alt: rgba(8, 12, 24, 0.92);
+  --color-text: #f5f7ff;
+  --color-text-muted: rgba(191, 204, 232, 0.75);
+  --color-accent: #818cf8;
+  --color-accent-muted: rgba(99, 102, 241, 0.24);
+  --color-border: rgba(79, 70, 229, 0.32);
+  --profile-surface: rgba(9, 12, 26, 0.92);
+  --profile-glow-1: rgba(79, 70, 229, 0.28);
+  --profile-glow-2: rgba(236, 72, 153, 0.26);
+  background: #050713;
 }
 
 body[data-theme='dark'] .section {
-  background: rgba(9, 14, 27, 0.65);
-  backdrop-filter: blur(24px);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 body[data-theme='dark'] .section--alt {
-  background: rgba(2, 8, 23, 0.82);
-  color: #e2e8f0;
+  background: transparent;
+  color: inherit;
 }
 
 body[data-theme='dark'] .header {
@@ -1474,9 +1536,9 @@ body[data-theme='dark'] .contact-form {
 }
 
 body[data-theme='dark'] .footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(9, 14, 27, 0.9);
-  color: rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .media-empty {
