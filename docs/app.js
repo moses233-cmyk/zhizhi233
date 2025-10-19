@@ -803,6 +803,7 @@ function init() {
   initSmoothScroll();
   initIntersectionHighlights();
   initGalleryLightbox();
+  bindVideoTitleInteraction();
   if (currentYear) {
     currentYear.textContent = new Date().getFullYear();
   }
@@ -813,3 +814,73 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+const videoHighlights = () => Array.from(document.querySelectorAll('.video-highlight'));
+
+function bindVideoTitleInteraction() {
+  const cards = videoHighlights();
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    if (card.dataset.titleBound === 'true') return;
+
+    const titleWrapper = card.querySelector('.video-highlight__title');
+    const titleSpan = titleWrapper?.querySelector('span');
+    if (!titleWrapper || !titleSpan) return;
+
+    card.dataset.titleBound = 'true';
+
+    if (!titleSpan.dataset.shadow) {
+      titleSpan.setAttribute('data-shadow', titleSpan.textContent || '');
+    }
+
+    const state = {
+      hidden: card.classList.contains('is-title-hidden'),
+      animating: false,
+    };
+
+    const hideTitle = () => {
+      if (!titleWrapper || state.hidden) return;
+      titleWrapper.classList.add('is-hidden');
+      card.classList.add('is-title-hidden');
+      state.hidden = true;
+      state.animating = true;
+      setTimeout(() => {
+        state.animating = false;
+      }, 700);
+    };
+
+    card.addEventListener(
+      'wheel',
+      (event) => {
+        if (event.deltaY === 0) return;
+        if (!state.hidden) {
+          event.preventDefault();
+          hideTitle();
+          return;
+        }
+        if (state.animating) {
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    card.addEventListener(
+      'touchmove',
+      (event) => {
+        if (!state.hidden) {
+          event.preventDefault();
+          hideTitle();
+          return;
+        }
+        if (state.animating) {
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+  });
+}
+
+document.addEventListener('videos:updated', bindVideoTitleInteraction);

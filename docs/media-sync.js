@@ -162,6 +162,9 @@ function renderImages(images, albumOrder) {
     const section = document.createElement('article');
     section.className = 'album-stack';
 
+    const frame = document.createElement('div');
+    frame.className = 'album-stack__frame';
+
     const stack = document.createElement('div');
     stack.className = 'album-stack__stack';
 
@@ -217,7 +220,8 @@ function renderImages(images, albumOrder) {
       stack.appendChild(link);
     });
 
-    section.appendChild(stack);
+    frame.appendChild(stack);
+    section.appendChild(frame);
     fragment.appendChild(section);
   });
 
@@ -237,14 +241,23 @@ function renderVideos(videos) {
   const fragment = document.createDocumentFragment();
   videos.forEach((item) => {
     const article = document.createElement('article');
-    article.className = 'media-card';
+    article.className = 'video-highlight';
 
-    const videoWrapper = document.createElement('div');
-    videoWrapper.className = 'media-card__video';
+    const glow = document.createElement('div');
+    glow.className = 'video-highlight__glow';
+
+    const frame = document.createElement('div');
+    frame.className = 'video-highlight__frame';
+
+    const inner = document.createElement('div');
+    inner.className = 'video-highlight__inner';
+    inner.dataset.title = item.title || '';
 
     const videoEl = document.createElement('video');
+    videoEl.className = 'video-highlight__video';
     videoEl.controls = true;
     videoEl.preload = 'none';
+    videoEl.playsInline = true;
 
     const source = document.createElement('source');
     source.src = item.url;
@@ -254,39 +267,27 @@ function renderVideos(videos) {
     const fallback = document.createElement('span');
     fallback.textContent = '您的浏览器不支持视频播放。';
     videoEl.appendChild(fallback);
-    videoWrapper.appendChild(videoEl);
+    inner.appendChild(videoEl);
+    frame.appendChild(inner);
 
-    const body = document.createElement('div');
-    body.className = 'media-card__body';
+    if (item.title) {
+      const titleOverlay = document.createElement('div');
+      titleOverlay.className = 'video-highlight__title';
 
-    const title = document.createElement('h3');
-    title.textContent = item.title || '未命名视频';
+      const titleText = document.createElement('span');
+      titleText.textContent = item.title;
+      titleOverlay.appendChild(titleText);
 
-    const summary = document.createElement('p');
-    summary.textContent = item.description || '暂未提供视频描述。';
+      frame.appendChild(titleOverlay);
+    }
 
-    const metaList = document.createElement('ul');
-    const albumLi = document.createElement('li');
-    albumLi.textContent = item.albumNames.length
-      ? `归属相册：${item.albumNames.join(' / ')}`
-      : '归属相册：未分类';
-    const uploaderLi = document.createElement('li');
-    uploaderLi.textContent = item.createdLabel
-      ? `上传于 ${item.createdLabel}`
-      : `上传者：${item.uploader_email || '未知'}`;
-    metaList.appendChild(albumLi);
-    metaList.appendChild(uploaderLi);
-
-    body.appendChild(title);
-    body.appendChild(summary);
-    body.appendChild(metaList);
-
-    article.appendChild(videoWrapper);
-    article.appendChild(body);
+    article.appendChild(glow);
+    article.appendChild(frame);
     fragment.appendChild(article);
   });
 
   videoGrid.appendChild(fragment);
+  document.dispatchEvent(new CustomEvent('videos:updated'));
 }
 
 function createEmptyMessage() {
