@@ -162,20 +162,6 @@ function renderImages(images, albumOrder) {
     const section = document.createElement('article');
     section.className = 'album-stack';
 
-    const header = document.createElement('header');
-    header.className = 'album-stack__header';
-
-    const title = document.createElement('h3');
-    title.className = 'album-stack__title';
-    title.textContent = group.title;
-
-    const count = document.createElement('span');
-    count.className = 'album-stack__count';
-    count.textContent = `${group.images.length} 张图片`;
-
-    header.appendChild(title);
-    header.appendChild(count);
-
     const stack = document.createElement('div');
     stack.className = 'album-stack__stack';
 
@@ -206,17 +192,32 @@ function renderImages(images, albumOrder) {
       img.loading = 'lazy';
 
       link.appendChild(img);
+
+      const overlay = document.createElement('div');
+      overlay.className = 'album-stack__overlay';
+
+      const overlayTitle = document.createElement('p');
+      overlayTitle.className = 'album-stack__overlay-title';
+      overlayTitle.textContent = item.title || group.title || '';
+      overlay.appendChild(overlayTitle);
+
+      const metaText =
+        (item.albumNames && item.albumNames.length && item.albumNames.join(' · ')) ||
+        item.createdLabel ||
+        item.description ||
+        '';
+      if (metaText) {
+        const overlayMeta = document.createElement('span');
+        overlayMeta.className = 'album-stack__overlay-meta';
+        overlayMeta.textContent = metaText;
+        overlay.appendChild(overlayMeta);
+      }
+
+      link.appendChild(overlay);
       stack.appendChild(link);
     });
 
-    section.appendChild(header);
     section.appendChild(stack);
-    if (group.images.length > 1) {
-      const hint = document.createElement('p');
-      hint.className = 'album-stack__hint';
-      hint.textContent = '点击展开，滚轮或方向键可切换上一/下一张';
-      section.appendChild(hint);
-    }
     fragment.appendChild(section);
   });
 
