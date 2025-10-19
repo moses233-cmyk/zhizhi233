@@ -213,7 +213,8 @@ ul {
   white-space: nowrap;
 }
 
-.language-toggle {
+.language-toggle,
+.lang-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -231,18 +232,31 @@ ul {
   backdrop-filter: blur(12px);
 }
 
-.language-toggle:hover {
+.lang-toggle {
+  position: fixed;
+  bottom: clamp(20px, 5vw, 36px);
+  right: clamp(20px, 5vw, 36px);
+  padding: 12px 20px;
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.language-toggle:hover,
+.lang-toggle:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(37, 99, 235, 0.25);
 }
 
-.language-toggle:focus-visible {
+.language-toggle:focus-visible,
+.lang-toggle:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
 
-.language-toggle[aria-pressed='true'] {
+.language-toggle[aria-pressed='true'],
+.lang-toggle[aria-pressed='true'] {
   background: rgba(37, 99, 235, 0.12);
   border-color: rgba(37, 99, 235, 0.35);
   color: var(--color-accent);
@@ -492,26 +506,264 @@ background-clip: text;           /* ✅ 标准属性 */
   }
 }
 
-@media (max-width: 768px) {
+/* 平板（481–768px）：收窄首屏留白并让卡片单列排布，避免中等屏幕出现横向挤压 */
+@media (min-width: 481px) and (max-width: 768px) {
   .hero {
-    padding: 24px 0 40px;
+    padding: 32px 16px 56px;
   }
 
   .hero::before {
-    inset: -80px -120px -160px;
+    inset: -90px -120px -180px;
+  }
+
+  .site-header {
+    padding: 32px 24px 56px;
+  }
+
+  .navbar {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .navbar__actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .profile-card {
+    grid-template-columns: 1fr;
     padding: 32px;
+    gap: 28px;
   }
 
   .profile-card__media {
     order: -1;
-    height: clamp(220px, 60vw, 320px);
+    height: clamp(240px, 48vw, 340px);
+    max-width: min(360px, 80vw);
+    margin: 0 auto;
+  }
+
+  .profile-card__title {
+    font-size: clamp(28px, 5vw, 40px);
   }
 
   .profile-card__actions {
     justify-content: flex-start;
+  }
+
+  .profile-card__subtitle {
+    max-width: none;
+  }
+
+  .contact-card {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 36px 24px;
+    gap: 28px;
+  }
+
+  .contact-card__info {
+    order: 2;
+  }
+
+  .contact-card .btn {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 12px 20px;
+  }
+
+  .section {
+    padding: 64px 24px;
+  }
+
+  .section__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gallery-grid,
+  .media-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .media-grid {
+    justify-items: stretch;
+  }
+
+  main {
+    padding-bottom: 96px;
+  }
+
+  .lang-toggle {
+    bottom: 24px;
+    right: 24px;
+  }
+}
+
+/* 小屏（<=480px）：压缩导航与卡片宽度，防止横向裁剪并让标题与浮动按钮自适应 */
+@media (max-width: 480px) {
+  .hero {
+    display: block;
+  }
+
+  .site-header {
+    padding: 24px 16px 40px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .navbar__actions {
+    margin-left: 0;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .navbar__links {
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .hero {
+    padding: 28px 16px 48px;
+  }
+
+  .hero::before {
+    inset: -72px -96px -140px;
+  }
+
+  .profile-card {
+    grid-template-columns: 1fr;
+    padding: 24px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .profile-card__media {
+    order: -1;
+    height: clamp(200px, 55vw, 260px);
+    max-width: min(260px, 72vw);
+    margin: 0 auto;
+    border-radius: 24px;
+  }
+
+  .profile-card__title {
+    font-size: clamp(22px, 7vw, 30px);
+  }
+
+  .profile-card__subtitle {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: none;
+  }
+
+  .profile-card__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    display: none;
+  }
+
+  .profile-card__actions .btn,
+  .profile-card__actions .btn--primary {
+    width: 100%;
+  }
+
+  .profile-card__content {
+    gap: 18px;
+  }
+
+  .profile-card__quote,
+  .profile-card__meta {
+    display: none;
+  }
+
+  .profile-card__greeting {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .profile-card__button {
+    display: none;
+  }
+
+  .section {
+    padding: 48px 16px;
+  }
+
+  .section__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .gallery-grid,
+  .media-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .media-grid {
+    justify-items: stretch;
+  }
+
+  .contact-card {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 18px;
+    gap: 24px;
+  }
+
+  .contact-card__info {
+    order: 2;
+  }
+
+  .contact-card .btn {
+    width: 100%;
+  }
+
+  .contact-card__info ul {
+    font-weight: 500;
+    gap: 6px;
+  }
+
+  .contact-card h2 {
+    font-size: 1.35rem;
+    line-height: 1.4;
+  }
+
+  .contact-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .contact-card__info ul li {
+    font-size: 0.82rem;
+  }
+
+  .footer {
+    padding: 24px 20px 32px;
+    gap: 12px;
+    font-size: 0.8rem;
+  }
+
+  .footer__links {
+    gap: 12px;
+    font-size: 0.85rem;
+  }
+
+  main {
+    padding-bottom: 128px;
+  }
+
+  .lang-toggle {
+    bottom: 16px;
+    right: 16px;
+    font-size: 0.85rem;
+    padding: 10px 18px;
   }
 }
 
@@ -520,6 +772,26 @@ background-clip: text;           /* ✅ 标准属性 */
   box-shadow: var(--shadow-md);
   object-fit: cover;
   aspect-ratio: 4 / 5;
+}
+
+/* 桌面（>=769px）：维持宽屏双列比例并把浮动按钮固定在视口角落 */
+@media (min-width: 769px) {
+  .profile-card {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr);
+  }
+
+  .profile-card__media {
+    height: clamp(280px, 32vw, 420px);
+  }
+
+  .lang-toggle {
+    bottom: 32px;
+    right: 32px;
+  }
+
+  main {
+    padding-bottom: 96px;
+  }
 }
 
 .btn {
@@ -1090,7 +1362,8 @@ body[data-theme='dark'] .theme-toggle {
   box-shadow: 0 24px 48px rgba(2, 8, 23, 0.45);
 }
 
-body[data-theme='dark'] .language-toggle {
+body[data-theme='dark'] .language-toggle,
+body[data-theme='dark'] .lang-toggle {
   background: rgba(17, 27, 47, 0.78);
   border: 1px solid rgba(148, 163, 184, 0.12);
   color: #e2e8f0;
@@ -1101,12 +1374,14 @@ body[data-theme='dark'] .theme-toggle__text {
   color: #e2e8f0;
 }
 
-body[data-theme='dark'] .language-toggle:hover {
+body[data-theme='dark'] .language-toggle:hover,
+body[data-theme='dark'] .lang-toggle:hover {
   background: rgba(17, 27, 47, 0.9);
   border-color: rgba(139, 92, 246, 0.45);
 }
 
-body[data-theme='dark'] .language-toggle[aria-pressed='true'] {
+body[data-theme='dark'] .language-toggle[aria-pressed='true'],
+body[data-theme='dark'] .lang-toggle[aria-pressed='true'] {
   background: rgba(139, 92, 246, 0.2);
   border-color: rgba(139, 92, 246, 0.55);
   color: #c4b5fd;
