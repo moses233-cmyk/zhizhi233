@@ -20,14 +20,21 @@
   <body>
     <header class="site-header" id="home">
       <nav class="navbar">
-        <a class="navbar__brand" href="#home" data-i18n="nav.brand">Wang Mingdi</a>
+        <ul class="nav" role="list">
+          <li class="nav__item nav__item--selected">
+            <a href="#profile" data-i18n="nav.profile" aria-current="page">个人卡片</a>
+          </li>
+          <li class="nav__item">
+            <a href="#gallery" data-i18n="nav.gallery">图片作品</a>
+          </li>
+          <li class="nav__item">
+            <a href="#video" data-i18n="nav.video">视频作品</a>
+          </li>
+          <li class="nav__item">
+            <a href="#contact" data-i18n="nav.contact">联系我</a>
+          </li>
+        </ul>
         <div class="navbar__actions">
-          <ul class="navbar__links">
-            <li><a href="#profile" data-i18n="nav.profile">个人卡片</a></li>
-            <li><a href="#gallery" data-i18n="nav.gallery">图片作品</a></li>
-            <li><a href="#video" data-i18n="nav.video">视频作品</a></li>
-            <li><a href="#contact" data-i18n="nav.contact">联系我</a></li>
-          </ul>
           <button
             id="language-toggle"
             class="language-toggle"

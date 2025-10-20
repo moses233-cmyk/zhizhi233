@@ -137,7 +137,7 @@ const translations = {
       'Whether you are a brand team, spatial designer, or innovation group, share your brief and I will craft a balanced visual plan.',
     'contact.cta': 'Email Me',
     'contact.phone': 'Phone: +86 193-1434-5676',
-    'contact.wechat': 'WeChat: wangmingdi_visual',
+    'contact.wechat': 'WeChat: zhiazhia233',
     'contact.location': 'Based in Suzhou - Available nationwide',
     'form.success': 'Form submitted. I will reply soon!',
     'lightbox.dialogAria': 'Image preview',
@@ -678,7 +678,7 @@ function initIntersectionHighlights() {
   if (typeof IntersectionObserver === 'undefined') return;
   const sections = Array.from(document.querySelectorAll('main section[id]'));
   const navLinks = Array.from(
-    document.querySelectorAll('.navbar__links a[href^="#"], .footer__links a[href^="#"]')
+    document.querySelectorAll('.nav a[href^="#"], .footer__links a[href^="#"]')
   );
 
   if (!sections.length || !navLinks.length) return;
@@ -690,10 +690,22 @@ function initIntersectionHighlights() {
       entries.forEach((entry) => {
         const id = `#${entry.target.id}`;
         const link = map.get(id);
-        if (!link) return;
-        if (entry.isIntersecting) {
-          navLinks.forEach((item) => item.classList.remove('is-active'));
-          link.classList.add('is-active');
+        if (!link || !entry.isIntersecting) return;
+
+        navLinks.forEach((item) => {
+          item.classList.remove('is-active');
+          const parentItem = item.closest('.nav__item');
+          if (parentItem) {
+            parentItem.classList.remove('nav__item--selected');
+          }
+          item.removeAttribute('aria-current');
+        });
+
+        link.classList.add('is-active');
+        const navItem = link.closest('.nav__item');
+        if (navItem) {
+          navItem.classList.add('nav__item--selected');
+          link.setAttribute('aria-current', 'page');
         }
       });
     },
@@ -701,6 +713,44 @@ function initIntersectionHighlights() {
   );
 
   sections.forEach((section) => observer.observe(section));
+}
+
+function initNavbarVisibility() {
+  const navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+
+  let lastScrollY = window.pageYOffset;
+  let ticking = false;
+  const deltaThreshold = 6;
+  const revealOffset = navbar.offsetHeight;
+
+  const updateVisibility = () => {
+    const currentY = window.pageYOffset;
+    const delta = currentY - lastScrollY;
+
+    const shouldReveal = delta < -deltaThreshold || currentY <= revealOffset;
+    const shouldHide = delta > deltaThreshold && currentY > revealOffset;
+
+    if (shouldReveal) {
+      navbar.classList.remove('navbar--hidden');
+    } else if (shouldHide) {
+      navbar.classList.add('navbar--hidden');
+    }
+
+    lastScrollY = currentY;
+    ticking = false;
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateVisibility);
+        ticking = true;
+      }
+    },
+    { passive: true }
+  );
 }
 
 function initGalleryLightbox() {
@@ -1071,6 +1121,7 @@ function init() {
   }
   initSmoothScroll();
   initIntersectionHighlights();
+  initNavbarVisibility();
   initGalleryLightbox();
   initWaveDividers();
   initAnimatedTestimonials();
