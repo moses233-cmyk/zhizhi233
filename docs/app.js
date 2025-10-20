@@ -13,6 +13,8 @@ const contactForm = document.querySelector('#contact-form');
 const formStatus = contactForm ? contactForm.querySelector('[data-form-status]') : null;
 const currentYear = document.querySelector('#current-year');
 const testimonialCard = document.querySelector('[data-component="animated-testimonials"]');
+const heroModal = document.querySelector('[data-hero-modal]');
+const heroTrigger = document.querySelector('[data-hero-trigger]');
 const galleryLinks = Array.from(document.querySelectorAll('.gallery-link'));
 const lightbox = document.querySelector('.lightbox');
 const lightboxDialog = lightbox ? lightbox.querySelector('.lightbox__dialog') : null;
@@ -46,34 +48,14 @@ const translations = {
     'theme.toggleLabelDark': 'Switch to daylight mode',
     'theme.text.night': 'Night Mode',
     'theme.text.day': 'Day Mode',
-    'hero.ariaLabel': 'Profile card and client testimonials',
-    'hero.media1.alt': 'Portfolio portraits created by Wang Mingdi',
-    'hero.media2.alt': 'Wang Mingdi lighting a studio scene',
-    'hero.media3.alt': 'Wang Mingdi filming on location',
-    'hero.entry1.greeting': 'Hi, I am',
-    'hero.entry1.title': 'Wang Mingdi - Photographer / Editor',
-    'hero.entry1.subtitle': 'Focused on spatial, architectural, and portrait storytelling for brands.',
-    'hero.entry1.quote':
-      'Mingdi brings our space to life; from shoot to final cut the images feel premium.',
-    'hero.entry1.meta': 'Suzhou NanoTech - Brand Marketing',
-    'hero.entry2.greeting': 'Hi, I am',
-    'hero.entry2.title': 'Wang Mingdi - Photographer / Editor',
-    'hero.entry2.subtitle':
-      'Blending an art design background with commercial needs to deliver practical visuals.',
-    'hero.entry2.quote':
-      'He tackles complex shoots on tight schedules while keeping a consistent visual voice.',
-    'hero.entry2.meta': 'Linyi Architectural Design Institute - Project Team',
-    'hero.entry3.greeting': 'Hi, I am',
-    'hero.entry3.title': 'Wang Mingdi - Photographer / Editor',
-    'hero.entry3.subtitle':
-      'Licensed drone pilot offering immersive views of cities and natural landscapes.',
-    'hero.entry3.quote':
-      'Working with Mingdi is smooth; his planning keeps every production efficient.',
-    'hero.entry3.meta': 'Humanoid Robotics Program - Lead',
-    'hero.actions.prev': 'View previous testimonial',
-    'hero.actions.next': 'View next testimonial',
-    'hero.actions.primary': 'View Work',
-    'hero.actions.secondary': 'Contact Me',
+    'hero.ariaLabel': 'Immersive video intro showcasing signature work',
+    'hero.videoFallback': 'Your browser does not support video playback.',
+    'hero.tagline': 'MediaStorm Studio',
+    'hero.title': 'Infinite Progress',
+    'hero.subtitle': 'I pass through this world and capture a single frame.',
+    'hero.cta': 'Explore Portfolio',
+    'hero.secondary': 'Watch more films',
+    'hero.scroll': 'Scroll to explore',
     'profile.title': 'Profile Card',
     'profile.lead': 'Get a quick look at my style, focus areas, and collaboration details.',
     'profile.cta': 'Start a Project',
@@ -602,13 +584,8 @@ function destroyDaylightBackground() {
 }
 
 function updateBackgrounds(theme) {
-  if (theme === 'dark') {
-    destroyDaylightBackground();
-    createNightSkyBackground();
-  } else {
-    destroyNightSkyBackground();
-    createDaylightBackground();
-  }
+  destroyDaylightBackground();
+  destroyNightSkyBackground();
 }
 
 function updateThemeToggleUI(theme) {
@@ -793,11 +770,22 @@ function initNavbarVisibility() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
 
+  const heroSection = document.querySelector('.hero--immersive');
+  const computeSolidThreshold = () => {
+    if (!heroSection) {
+      return navbar.offsetHeight;
+    }
+    const { height } = heroSection.getBoundingClientRect();
+    const heroHeight = height || heroSection.offsetHeight;
+    return Math.max(heroHeight - navbar.offsetHeight * 1.6, navbar.offsetHeight * 1.6);
+  };
+
   let lastScrollY = window.pageYOffset;
   let ticking = false;
   const deltaThreshold = 6;
   const revealOffset = navbar.offsetHeight;
   let isHidden = navbar.classList.contains('navbar--hidden');
+  let solidThreshold = computeSolidThreshold();
 
   const updateVisibility = () => {
     const currentY = window.scrollY || window.pageYOffset;
@@ -814,6 +802,9 @@ function initNavbarVisibility() {
       isHidden = true;
     }
 
+    const shouldBeSolid = currentY > solidThreshold;
+    navbar.classList.toggle('navbar--solid', shouldBeSolid);
+
     lastScrollY = currentY;
     ticking = false;
   };
@@ -828,6 +819,15 @@ function initNavbarVisibility() {
     },
     { passive: true }
   );
+
+  const handleResize = () => {
+    solidThreshold = computeSolidThreshold();
+    ticking = false;
+    updateVisibility();
+  };
+
+  window.addEventListener('resize', handleResize);
+  updateVisibility();
 }
 
 function initGalleryLightbox() {
@@ -982,6 +982,74 @@ function handleFormSubmit(event) {
   }
   targetForm.reset();
 }
+
+function initHeroModal() {
+  if (!heroModal || !heroTrigger) return;
+
+  let backdrop;
+
+  const ensureBackdrop = () => {
+    if (backdrop) return backdrop;
+    backdrop = document.createElement('div');
+    backdrop.className = 'hero-backdrop';
+    backdrop.addEventListener('click', hideHeroModal);
+    document.body.appendChild(backdrop);
+    return backdrop;
+  };
+
+  const focusFirstElement = () => {
+    const focusable = heroModal.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable) {
+      focusable.focus({ preventScroll: true });
+    }
+  };
+
+  function showHeroModal() {
+    ensureBackdrop().classList.add('is-visible');
+    heroModal.classList.add('is-visible');
+    heroModal.setAttribute('aria-hidden', 'false');
+    heroTrigger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('has-hero-open');
+    window.setTimeout(focusFirstElement, 260);
+  }
+
+  function hideHeroModal() {
+    backdrop?.classList.remove('is-visible');
+    heroModal.classList.remove('is-visible');
+    heroModal.setAttribute('aria-hidden', 'true');
+    heroTrigger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('has-hero-open');
+  }
+
+  const toggleHeroModal = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (heroModal.classList.contains('is-visible')) {
+      hideHeroModal();
+    } else {
+      showHeroModal();
+    }
+  };
+
+  heroTrigger.setAttribute('aria-expanded', 'false');
+  heroTrigger.addEventListener('click', toggleHeroModal);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && heroModal.classList.contains('is-visible')) {
+      hideHeroModal();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!heroModal.classList.contains('is-visible')) return;
+    if (heroModal.contains(event.target)) return;
+    if (heroTrigger.contains(event.target)) return;
+    hideHeroModal();
+  });
+}
+
 function initAnimatedTestimonials() {
   if (!testimonialCard) return;
 
@@ -1069,6 +1137,7 @@ function init() {
   initNavDropdown();
   initNavbarVisibility();
   initGalleryLightbox();
+  initHeroModal();
   initAnimatedTestimonials();
   bindVideoTitleInteraction();
   if (currentYear) {

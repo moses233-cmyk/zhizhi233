@@ -15,6 +15,16 @@ const albumDescriptionInput = document.querySelector('[data-album-description]')
 const libraryContainer = document.querySelector('[data-album-library]');
 const libraryEmptyEl = document.querySelector('[data-library-empty]');
 const libraryCountEl = document.querySelector('[data-library-count]');
+const uploadProgressContainer = document.querySelector('[data-upload-progress]');
+const uploadProgressLabel = document.querySelector('[data-upload-progress-label]');
+const uploadProgressPercent = document.querySelector('[data-upload-progress-percent]');
+const uploadProgressBar = document.querySelector('[data-upload-progress-bar]');
+const storageOverviewEl = document.querySelector('[data-storage-overview]');
+const storageTotalEl = document.querySelector('[data-storage-total-size]');
+const storageSelectedSizeEl = document.querySelector('[data-storage-selected-size]');
+const storageSelectedCountEl = document.querySelector('[data-storage-selected-count]');
+const storageLatestSizeEl = document.querySelector('[data-storage-latest-size]');
+const storageLatestNameEl = document.querySelector('[data-storage-latest-name]');
 
 const STORAGE_PUBLIC_PREFIX = `/storage/v1/object/public/${BUCKET_ID}/`;
 
@@ -43,6 +53,14 @@ const albumItemsState = {
 
 const libraryUiState = {
   expanded: new Set(),
+};
+
+const uploadProgressState = {
+  totalFiles: 0,
+  currentFileIndex: 0,
+  currentFileName: '',
+  currentLoaded: 0,
+  currentTotal: 0,
 };
 
 let dragContext = null;
@@ -103,6 +121,42 @@ function formatDate(value) {
   }
 }
 
+function formatBytes(bytes) {
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value <= 0) {
+    return '0 B';
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = value;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  const precision = size >= 100 || unitIndex === 0 ? 0 : size >= 10 ? 1 : 2;
+  return `${size.toFixed(precision)} ${units[unitIndex]}`;
+}
+
+function getMediaSize(media) {
+  if (!media) return 0;
+  const rawValue =
+    typeof media.size_bytes !== 'undefined'
+      ? media.size_bytes
+      : typeof media.sizeBytes !== 'undefined'
+        ? media.sizeBytes
+        : typeof media.bytes !== 'undefined'
+          ? media.bytes
+          : 0;
+  const numeric = Number(rawValue);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return 0;
+  }
+  return numeric;
+}
+
 function renderAlbumStats() {
   if (!albumStatsEl) return;
   if (!albumState.items.length) {
@@ -111,32 +165,61 @@ function renderAlbumStats() {
   }
 
   albumStatsEl.innerHTML = albumState.items
-    .map(
-      (album) => `
+    .map((album) => {
+      const entries = getAlbumEntries(album.id);
+      const hasLocalEntries = entries.length > 0;
+      const fallbackCount = album.item_count ?? 0;
+      const itemCount = hasLocalEntries ? entries.length : fallbackCount;
+
+      let sizeBytes = 0;
+      if (hasLocalEntries) {
+        sizeBytes = entries.reduce((sum, entry) => {
+          const media = mediaState.map.get(entry.mediaId);
+          return sum + getMediaSize(media);
+        }, 0);
+      } else if (itemCount > 0) {
+        const fallbackSize = Number(album.total_size_bytes);
+        if (Number.isFinite(fallbackSize) && fallbackSize > 0) {
+          sizeBytes = fallbackSize;
+        } else {
+          sizeBytes = null;
+        }
+      }
+
+      const sizeLabel = sizeBytes === null ? '—' : formatBytes(sizeBytes);
+
+      return `
       <li class="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
         <div class="min-w-0 flex-1 truncate">
           <span class="font-medium text-white/80">${album.title}</span>
           ${album.description ? `<span class="ml-2 truncate text-white/40">${album.description}</span>` : ''}
         </div>
-        <span class="rounded-full bg-white/10 px-3 py-0.5 text-[11px] text-white/60">
-          ${album.item_count ?? 0} 项
+        <span class="rounded-full bg-white/10 px-3 py-0.5 text-[11px] text-white/60 leading-tight">
+          <span>${itemCount} 项</span>
+          <span class="ml-2 text-white/40">${sizeLabel}</span>
         </span>
       </li>
-    `
-    )
+    `;
+    })
     .join('');
 }
 
 function updateAlbumSelectionSummary() {
-  if (!albumSummaryEl) return;
+  if (!albumSummaryEl) {
+    updateStorageOverview();
+    return;
+  }
+
   if (!albumState.selected.size) {
     albumSummaryEl.textContent = '当前未选择相册';
+    updateStorageOverview();
     return;
   }
 
   const selectedAlbums = albumState.items.filter((album) => albumState.selected.has(album.id));
   const summary = selectedAlbums.map((album) => album.title).join(' / ');
   albumSummaryEl.textContent = `已选相册：${summary}`;
+  updateStorageOverview();
 }
 
 function renderAlbumPicker() {
@@ -237,6 +320,107 @@ function getAlbumKey(albumId) {
   return albumId ?? '__unassigned__';
 }
 
+function getAlbumEntries(albumId) {
+  return albumItemsState.byAlbum.get(albumId) ?? [];
+}
+
+function calculateAlbumSize(albumId) {
+  const entries = getAlbumEntries(albumId);
+  return entries.reduce((sum, entry) => {
+    const media = mediaState.map.get(entry.mediaId);
+    return sum + getMediaSize(media);
+  }, 0);
+}
+
+function calculateSelectedAlbumsSize() {
+  if (!albumState.selected.size) {
+    return 0;
+  }
+  let total = 0;
+  albumState.selected.forEach((albumId) => {
+    total += calculateAlbumSize(albumId);
+  });
+  return total;
+}
+
+function getLatestMediaItem() {
+  if (!mediaState.items.length) {
+    return null;
+  }
+  return mediaState.items[0];
+}
+
+function updateStorageOverview() {
+  if (!storageOverviewEl) return;
+
+  const totalBytes = mediaState.items.reduce((sum, item) => sum + getMediaSize(item), 0);
+  const selectedBytes = calculateSelectedAlbumsSize();
+  const latestMedia = getLatestMediaItem();
+
+  const shouldShow = totalBytes > 0 || albumState.selected.size > 0 || Boolean(latestMedia);
+  storageOverviewEl.hidden = !shouldShow;
+  if (!shouldShow) {
+    return;
+  }
+
+  if (storageTotalEl) {
+    storageTotalEl.textContent = formatBytes(totalBytes);
+  }
+
+  if (storageSelectedSizeEl) {
+    storageSelectedSizeEl.textContent = formatBytes(selectedBytes);
+  }
+
+  if (storageSelectedCountEl) {
+    storageSelectedCountEl.textContent = albumState.selected.size
+      ? `已选 ${albumState.selected.size} 个相册`
+      : '当前未选择相册';
+  }
+
+  if (storageLatestSizeEl) {
+    storageLatestSizeEl.textContent = formatBytes(getMediaSize(latestMedia));
+  }
+
+  if (storageLatestNameEl) {
+    storageLatestNameEl.textContent = latestMedia
+      ? latestMedia.title || latestMedia.url || '最新媒体'
+      : '尚未上传文件';
+  }
+}
+
+function renderFeaturedIcon(isFeatured) {
+  if (isFeatured) {
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+        <path
+          d="M12 3.5l2.29 4.64 5.12.75-3.7 3.6.87 5.07L12 14.77l-4.58 2.39.87-5.07-3.7-3.6 5.12-.75L12 3.5z"
+        />
+      </svg>
+    `;
+  }
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+      <path
+        d="M12 3.5l2.29 4.64 5.12.75-3.7 3.6.87 5.07L12 14.77l-4.58 2.39.87-5.07-3.7-3.6 5.12-.75L12 3.5z"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        fill="none"
+      />
+    </svg>
+  `;
+}
+
+function updateFeaturedButtonAppearance(button, isFeatured) {
+  if (!button) return;
+  button.innerHTML = renderFeaturedIcon(isFeatured);
+  button.dataset.featuredState = isFeatured ? 'true' : 'false';
+  button.setAttribute('aria-pressed', String(Boolean(isFeatured)));
+  button.setAttribute('aria-label', isFeatured ? '取消精选' : '设为精选');
+  button.title = isFeatured ? '取消精选' : '设为精选';
+}
+
 function updateLibraryIndicators() {
   if (libraryCountEl) {
     libraryCountEl.textContent = String(mediaState.items.length);
@@ -248,7 +432,10 @@ function updateLibraryIndicators() {
 }
 
 function renderAlbumLibrary() {
-  if (!libraryContainer) return;
+  if (!libraryContainer) {
+    updateStorageOverview();
+    return;
+  }
 
   updateLibraryIndicators();
   libraryContainer.innerHTML = '';
@@ -273,8 +460,10 @@ function renderAlbumLibrary() {
       })
       .filter(Boolean);
 
+    const albumSize = items.reduce((sum, entry) => sum + getMediaSize(entry.media), 0);
     const panel = createAlbumPanel(album, items, {
       autoOpen: shouldAutoExpand && index === 0,
+      totalSize: albumSize,
     });
     fragment.appendChild(panel);
   });
@@ -286,21 +475,24 @@ function renderAlbumLibrary() {
       assignment: { albumId: null, position: null, createdAt: media.created_at },
     }));
 
+  const unassignedSize = unassignedItems.reduce((sum, entry) => sum + getMediaSize(entry.media), 0);
   const unassignedPanel = createAlbumPanel(
     { id: null, title: '未分类', description: '' },
     unassignedItems,
     {
       isUnassigned: true,
       autoOpen: shouldAutoExpand && !albumState.items.length,
+      totalSize: unassignedSize,
     }
   );
   fragment.appendChild(unassignedPanel);
 
   libraryContainer.appendChild(fragment);
+  updateStorageOverview();
 }
 
 function createAlbumPanel(album, entries, options = {}) {
-  const { isUnassigned = false, autoOpen = false } = options;
+  const { isUnassigned = false, autoOpen = false, totalSize = 0 } = options;
   const albumId = album.id ?? null;
   const key = getAlbumKey(albumId);
 
@@ -344,8 +536,15 @@ function createAlbumPanel(album, entries, options = {}) {
   summaryActions.className = 'flex shrink-0 items-center gap-2';
 
   const countBadge = document.createElement('span');
-  countBadge.className = 'rounded-full bg-white/10 px-3 py-1 text-xs text-white/60';
-  countBadge.textContent = `${entries.length} 项`;
+  countBadge.className =
+    'flex flex-col items-end rounded-full bg-white/10 px-3 py-1 text-xs text-white/60 leading-tight';
+  const countLabel = document.createElement('span');
+  countLabel.textContent = `${entries.length} 项`;
+  countBadge.appendChild(countLabel);
+  const sizeLabel = document.createElement('span');
+  sizeLabel.className = 'text-[10px] text-white/40';
+  sizeLabel.textContent = formatBytes(totalSize);
+  countBadge.appendChild(sizeLabel);
   summaryActions.appendChild(countBadge);
 
   if (!isUnassigned) {
@@ -409,8 +608,14 @@ function createMediaItemElement(media, context) {
   item.dataset.albumId = context.albumId ?? '';
   item.dataset.mediaType = media.type;
   item.draggable = true;
-  item.className =
-    'group flex cursor-grab items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 shadow-sm transition hover:border-white/30 hover:bg-white/10 active:cursor-grabbing';
+  const itemClasses = [
+    'group flex cursor-grab items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 shadow-sm transition hover:border-white/30 hover:bg-white/10 active:cursor-grabbing',
+  ];
+  if (media.is_featured) {
+    itemClasses.push('border-amber-400/60 bg-amber-500/10 text-white');
+  }
+  item.className = itemClasses.join(' ');
+  item.dataset.featured = media.is_featured ? 'true' : 'false';
 
   const info = document.createElement('div');
   info.className = 'min-w-0 flex-1';
@@ -434,11 +639,16 @@ function createMediaItemElement(media, context) {
   const meta = document.createElement('p');
   meta.className = 'mt-1 text-[11px] uppercase tracking-widest text-white/40';
   const createdLabel = media.created_at ? formatDate(media.created_at) : '未知时间';
-  meta.textContent = `${media.type} · ${media.uploader_email ?? '未知'} · ${createdLabel}`;
+  const sizeLabel = formatBytes(getMediaSize(media));
+  meta.textContent = `${media.type} · ${media.uploader_email ?? '未知'} · ${createdLabel} · ${sizeLabel}`;
   info.appendChild(meta);
 
   const tags = document.createElement('div');
   tags.className = 'mt-2 flex flex-wrap gap-1';
+  const sizeBadge = document.createElement('span');
+  sizeBadge.className = 'rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-white/60';
+  sizeBadge.textContent = sizeLabel;
+  tags.appendChild(sizeBadge);
   if (media.albumNames?.length) {
     media.albumNames.forEach((name) => {
       const badge = document.createElement('span');
@@ -458,6 +668,14 @@ function createMediaItemElement(media, context) {
 
   const actions = document.createElement('div');
   actions.className = 'flex shrink-0 flex-wrap items-center justify-end gap-2';
+
+  const featureButton = document.createElement('button');
+  featureButton.type = 'button';
+  featureButton.dataset.toggleFeatured = media.id;
+  featureButton.className =
+    'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/60 transition hover:border-amber-400/60 hover:text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/60';
+  updateFeaturedButtonAppearance(featureButton, Boolean(media.is_featured));
+  actions.appendChild(featureButton);
 
   const preview = document.createElement('a');
   preview.href = media.url;
@@ -555,7 +773,37 @@ function getMediaById(mediaId) {
   return mediaState.map.get(mediaId) ?? mediaState.items.find((item) => item.id === mediaId) ?? null;
 }
 
+async function toggleMediaFeatured(mediaId) {
+  const targetItem = getMediaById(mediaId);
+  if (!targetItem) {
+    showMessage('未找到对应的媒体记录。', 'error');
+    return;
+  }
+
+  const nextState = !targetItem.is_featured;
+
+  try {
+    const { error } = await supabase.from(MEDIA_TABLE).update({ is_featured: nextState }).eq('id', mediaId);
+    if (error) throw error;
+
+    showMessage(nextState ? '已设为素材精选。' : '已取消素材精选。', 'success');
+    await refreshMediaItems();
+  } catch (error) {
+    console.error('更新素材精选状态失败', error);
+    showMessage(`更新精选状态失败：${error.message ?? error}`, 'error', 6000);
+  }
+}
+
 function handleLibraryClick(event) {
+  const featureButton = event.target.closest('[data-toggle-featured]');
+  if (featureButton) {
+    const mediaId = featureButton.dataset.toggleFeatured;
+    if (mediaId) {
+      toggleMediaFeatured(mediaId);
+    }
+    return;
+  }
+
   const deleteButton = event.target.closest('[data-delete-media]');
   if (deleteButton) {
     const mediaId = deleteButton.dataset.deleteMedia;
@@ -801,6 +1049,73 @@ function clearDropzoneHighlights() {
     });
 }
 
+function resetUploadProgress() {
+  if (uploadProgressLabel) {
+    uploadProgressLabel.textContent = '正在上传文件...';
+  }
+  if (uploadProgressPercent) {
+    uploadProgressPercent.textContent = '0%';
+  }
+  if (uploadProgressBar) {
+    uploadProgressBar.style.width = '0%';
+  }
+  uploadProgressState.currentLoaded = 0;
+  uploadProgressState.currentTotal = 0;
+  uploadProgressState.currentFileName = '';
+  uploadProgressState.currentFileIndex = 0;
+}
+
+function setUploadProgressVisibility(visible) {
+  if (!uploadProgressContainer) return;
+  uploadProgressContainer.hidden = !visible;
+}
+
+function startUploadProgress(totalFiles) {
+  uploadProgressState.totalFiles = totalFiles;
+  resetUploadProgress();
+  if (totalFiles > 0) {
+    setUploadProgressVisibility(true);
+  }
+}
+
+function finishUploadProgress() {
+  setUploadProgressVisibility(false);
+  uploadProgressState.totalFiles = 0;
+  resetUploadProgress();
+}
+
+function updateUploadProgress(details) {
+  if (!uploadProgressContainer) return;
+
+  const {
+    fileName = '文件',
+    fileIndex = uploadProgressState.currentFileIndex,
+    totalFiles = uploadProgressState.totalFiles || 1,
+    loaded = 0,
+    total = uploadProgressState.currentTotal || 0,
+  } = details || {};
+
+  const safeTotal = total > 0 ? total : 1;
+  const percent = Math.max(0, Math.min(100, Math.round((loaded / safeTotal) * 100)));
+
+  uploadProgressState.currentFileName = fileName;
+  uploadProgressState.currentFileIndex = fileIndex;
+  uploadProgressState.currentLoaded = loaded;
+  uploadProgressState.currentTotal = total;
+
+  if (uploadProgressLabel) {
+    uploadProgressLabel.textContent = `上传中 (${fileIndex}/${totalFiles}) · ${fileName}`;
+  }
+
+  if (uploadProgressPercent) {
+    uploadProgressPercent.textContent = `${percent}%`;
+  }
+
+  if (uploadProgressBar) {
+    uploadProgressBar.style.width = `${percent}%`;
+  }
+}
+
 function handleDragStart(event) {
   const item = event.target.closest('[data-media-item]');
   if (!item) return;
@@ -1037,6 +1352,7 @@ async function refreshMediaItems() {
     albumItemsState.byMedia = assignmentsByMedia;
 
     renderAlbumLibrary();
+    renderAlbumStats();
   } catch (error) {
     console.error('获取媒体列表失败', error);
     showMessage(`获取媒体列表失败：${error.message ?? error}`, 'error', 6000);
@@ -1101,24 +1417,52 @@ async function uploadFiles(files) {
 
   const albumIds = getSelectedAlbumIds();
   toggleUploadState(true);
+  startUploadProgress(files.length);
 
   let successCount = 0;
   let failureCount = 0;
 
   try {
-    for (const file of files) {
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
       const mediaType = determineMediaType(file);
       if (!mediaType) {
         failureCount += 1;
         showMessage(`跳过 ${file.name}：不支持的文件类型。`, 'error', 5000);
+        updateUploadProgress({
+          fileName: file.name,
+          fileIndex: index + 1,
+          totalFiles: files.length,
+          loaded: 1,
+          total: 1,
+        });
         continue;
       }
 
       const storagePath = buildStoragePath(file, mediaType, albumIds);
+      const totalBytes = file.size && file.size > 0 ? file.size : 1;
+      updateUploadProgress({
+        fileName: file.name,
+        fileIndex: index + 1,
+        totalFiles: files.length,
+        loaded: 0,
+        total: totalBytes,
+      });
       const uploadResult = await supabase.storage.from(BUCKET_ID).upload(storagePath, file, {
         cacheControl: '3600',
         upsert: false,
         contentType: file.type || 'application/octet-stream',
+        onUploadProgress: (event) => {
+          const progressTotal = event?.total ?? totalBytes;
+          const loadedValue = event?.loaded ?? progressTotal;
+          updateUploadProgress({
+            fileName: file.name,
+            fileIndex: index + 1,
+            totalFiles: files.length,
+            loaded: loadedValue,
+            total: progressTotal || 1,
+          });
+        },
       });
 
       if (uploadResult.error) {
@@ -1141,6 +1485,8 @@ async function uploadFiles(files) {
           description: '',
           url: publicUrl,
           uploader_email: session.user.email,
+          size_bytes: file.size ?? null,
+          is_featured: false,
         })
         .select()
         .single();
@@ -1176,11 +1522,19 @@ async function uploadFiles(files) {
         }
       }
 
+      updateUploadProgress({
+        fileName: file.name,
+        fileIndex: index + 1,
+        totalFiles: files.length,
+        loaded: totalBytes,
+        total: totalBytes,
+      });
       successCount += 1;
     }
   } finally {
     toggleUploadState(false);
     uploadInput.value = '';
+    finishUploadProgress();
   }
 
   if (successCount) {

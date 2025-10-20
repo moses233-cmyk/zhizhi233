@@ -22,6 +22,12 @@ create index if not exists idx_album_items_album on public.album_items(album_id)
 create index if not exists idx_album_items_media on public.album_items(media_item_id);
 create index if not exists idx_media_items_created_at on public.media_items(created_at);
 
+alter table if exists public.media_items
+  add column if not exists is_featured boolean not null default false;
+
+alter table if exists public.media_items
+  add column if not exists size_bytes bigint;
+
 alter table public.albums enable row level security;
 alter table public.album_items enable row level security;
 
@@ -59,6 +65,7 @@ select
   a.cover_item_id,
   a.created_at,
   count(ai.media_item_id)::int as item_count,
+  coalesce(sum(mi.size_bytes), 0)::bigint as total_size_bytes,
   max(mi.created_at) as last_added_at
 from public.albums a
 left join public.album_items ai on ai.album_id = a.id

@@ -19,10 +19,16 @@
   </head>
   <body>
     <header class="site-header" id="home">
-      <nav class="navbar">
+      <nav class="navbar" aria-label="主导航">
+        <a class="navbar__brand" href="#home" data-i18n="nav.brand">鸣笛视觉</a>
         <ul class="nav" role="list">
           <li class="nav__item nav__item--selected">
-            <a href="#profile" data-i18n="nav.profile" aria-current="page">个人卡片</a>
+            <a
+              href="#profile-card"
+              data-i18n="nav.profile"
+              aria-current="page"
+              data-hero-trigger
+            >个人卡片</a>
           </li>
           <li class="nav__item nav__item--has-dropdown" data-nav-dropdown>
             <a
@@ -77,132 +83,144 @@
           </button>
         </div>
       </nav>
-      <!-- 首屏 -->
       <section
-        class="hero"
-        aria-label="个人名片与客户评价"
+        class="hero hero--immersive"
+        aria-label="沉浸式作品首屏"
         data-i18n-attr="aria-label:hero.ariaLabel"
       >
-        <div
-          class="profile-card"
-          data-component="animated-testimonials"
-          data-autoplay="true"
+        <video
+          class="hero__video"
+          autoplay
+          loop
+          muted
+          playsinline
+          webkit-playsinline
+          x5-playsinline
+          preload="auto"
+          disablepictureinpicture
+          controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"
+          id="hero-video"
+          poster="assets/me.jpg"
+          data-hero-video
         >
-          <div class="profile-card__media">
-            <div class="profile-card__stack" aria-hidden="true">
-              <figure class="profile-card__image is-active" data-index="0">
-                <img
-                  src="assets/me.jpg"
-                  alt="王鸣笛摄影作品集锦"
-                  loading="lazy"
-                  data-i18n-attr="alt:hero.media1.alt"
-                />
-              </figure>
-              <figure class="profile-card__image" data-index="1">
-                <img
-                  src="assets/me.jpg"
-                  alt="王鸣笛在棚内布光场景"
-                  loading="lazy"
-                  data-i18n-attr="alt:hero.media2.alt"
-                />
-              </figure>
-              <figure class="profile-card__image" data-index="2">
-                <img
-                  src="assets/me.jpg"
-                  alt="王鸣笛外景拍摄实况"
-                  loading="lazy"
-                  data-i18n-attr="alt:hero.media3.alt"
-                />
-              </figure>
-            </div>
-          </div>
-          <div class="profile-card__content">
-            <article class="profile-card__entry is-active" data-index="0">
-              <header class="profile-card__header">
-                <p class="profile-card__greeting" data-i18n="hero.entry1.greeting">你好，我是</p>
-                <h1 class="profile-card__title" data-i18n="hero.entry1.title">
-                  王鸣笛 · 摄影师 / 剪辑师
-                </h1>
-                <p class="profile-card__subtitle" data-i18n="hero.entry1.subtitle">
-                  专注空间、建筑与人像影像创作，擅长用镜头构建品牌视觉故事。
-                </p>
-              </header>
-              <blockquote
-                class="profile-card__quote"
-                aria-live="polite"
-                data-i18n="hero.entry1.quote"
-              >
-                “鸣笛的镜头让我们的空间焕发生命力，从拍摄到成片都极具质感。”
-              </blockquote>
-              <p class="profile-card__meta" data-i18n="hero.entry1.meta">
-                —— 苏州微纳纳米科技 · 品牌市场部
-              </p>
-            </article>
-            <article class="profile-card__entry" data-index="1">
-              <header class="profile-card__header">
-                <p class="profile-card__greeting" data-i18n="hero.entry2.greeting">你好，我是</p>
-                <h1 class="profile-card__title" data-i18n="hero.entry2.title">
-                  王鸣笛 · 摄影师 / 剪辑师
-                </h1>
-                <p class="profile-card__subtitle" data-i18n="hero.entry2.subtitle">
-                  将艺术设计背景与商业需求结合，打造可落地的影像解决方案。
-                </p>
-              </header>
-              <blockquote
-                class="profile-card__quote"
-                aria-live="polite"
-                data-i18n="hero.entry2.quote"
-              >
-                “他总能在有限时间内完成复杂拍摄任务，并保持影像风格的统一。”
-              </blockquote>
-              <p class="profile-card__meta" data-i18n="hero.entry2.meta">
-                —— 临沂市建筑设计研究院 · 项目组
-              </p>
-            </article>
-            <article class="profile-card__entry" data-index="2">
-              <header class="profile-card__header">
-                <p class="profile-card__greeting" data-i18n="hero.entry3.greeting">你好，我是</p>
-                <h1 class="profile-card__title" data-i18n="hero.entry3.title">
-                  王鸣笛 · 摄影师 / 剪辑师
-                </h1>
-                <p class="profile-card__subtitle" data-i18n="hero.entry3.subtitle">
-                  无人机航拍持证摄影师，为城市与自然提供沉浸式视觉记录。
-                </p>
-              </header>
-              <blockquote
-                class="profile-card__quote"
-                aria-live="polite"
-                data-i18n="hero.entry3.quote"
-              >
-                “与鸣笛合作是一次快体验，他的脚本规划让拍摄流程顺畅高效。”
-              </blockquote>
-              <p class="profile-card__meta" data-i18n="hero.entry3.meta">
-                —— 人形机器人项目 · 负责人
-              </p>
-            </article>
-            <div class="profile-card__actions">
-              <button
-                class="profile-card__button"
-                type="button"
-                data-action="prev"
-                aria-label="查看上一条评价"
-                data-i18n-attr="aria-label:hero.actions.prev"
-              >
-                <span aria-hidden="true">←</span>
-              </button>
-              <button
-                class="profile-card__button"
-                type="button"
-                data-action="next"
-                aria-label="查看下一条评价"
-                data-i18n-attr="aria-label:hero.actions.next"
-              >
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </div>
+          <source src="https://cdn.coverr.co/videos/coverr-deep-space-1741814933384?download=1" type="video/mp4" />
+          <span data-i18n="hero.videoFallback">您的浏览器不支持视频播放。</span>
+        </video>
+        <div class="hero__overlay" aria-hidden="true"></div>
+        <div class="hero__content">
+          <p class="hero__tagline" data-i18n="hero.tagline">MEDIASTORM STUDIO</p>
+          <h1 class="hero__title" data-i18n="hero.title">光影之间</h1>
+          <p class="hero__subtitle" data-i18n="hero.subtitle">
+            我从这个世界路过并截下一帧
+          </p>
         </div>
+        <a class="hero__scroll-indicator" href="#gallery">
+          <span class="hero__scroll-text" data-i18n="hero.scroll">向下滚动</span>
+          <span class="hero__scroll-icon" aria-hidden="true">⌄</span>
+        </a>
       </section>
+
+      <div
+        class="profile-modal"
+        id="profile-card"
+        data-hero-modal
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-card-title"
+      >
+        <div class="profile-card-frame">
+          <article
+            class="profile-card"
+            data-component="animated-testimonials"
+            data-autoplay="true"
+          >
+            <div class="profile-card__media">
+              <div class="profile-card__stack">
+                <figure class="profile-card__image is-active" data-index="0">
+                  <img src="assets/me.jpg" alt="" loading="lazy" />
+                </figure>
+                <figure class="profile-card__image" data-index="1">
+                  <img src="assets/me.jpg" alt="" loading="lazy" />
+                </figure>
+                <figure class="profile-card__image" data-index="2">
+                  <img src="assets/me.jpg" alt="" loading="lazy" />
+                </figure>
+              </div>
+            </div>
+            <div class="profile-card__content">
+              <article class="profile-card__entry is-active" data-index="0">
+                <header class="profile-card__header">
+                  <p class="profile-card__greeting" data-i18n="hero.entry1.greeting">你好，我是</p>
+                  <h2 class="profile-card__title" id="profile-card-title" data-i18n="hero.entry1.title">
+                    王鸣笛 · 摄影师 / 剪辑师
+                  </h2>
+                  <p class="profile-card__subtitle" data-i18n="hero.entry1.subtitle">
+                    专注空间、建筑与人像影像创作，擅长用镜头构建品牌视觉故事。
+                  </p>
+                </header>
+                <blockquote class="profile-card__quote" data-i18n="hero.entry1.quote">
+                  “鸣笛的镜头让我们的空间焕发生命力，从拍摄到成片都极具质感。”
+                </blockquote>
+                <p class="profile-card__meta" data-i18n="hero.entry1.meta">—— 苏州微纳纳米科技 · 品牌市场部</p>
+              </article>
+
+              <article class="profile-card__entry" data-index="1">
+                <header class="profile-card__header">
+                  <p class="profile-card__greeting" data-i18n="hero.entry2.greeting">你好，我是</p>
+                  <h2 class="profile-card__title" data-i18n="hero.entry2.title">
+                    王鸣笛 · 摄影师 / 剪辑师
+                  </h2>
+                  <p class="profile-card__subtitle" data-i18n="hero.entry2.subtitle">
+                    将艺术设计背景与商业需求结合，打造可落地的影像解决方案。
+                  </p>
+                </header>
+                <blockquote class="profile-card__quote" data-i18n="hero.entry2.quote">
+                  “他总能在有限时间内完成复杂拍摄任务，并保持影像风格的统一。”
+                </blockquote>
+                <p class="profile-card__meta" data-i18n="hero.entry2.meta">—— 临沂市建筑设计研究院 · 项目组</p>
+              </article>
+
+              <article class="profile-card__entry" data-index="2">
+                <header class="profile-card__header">
+                  <p class="profile-card__greeting" data-i18n="hero.entry3.greeting">你好，我是</p>
+                  <h2 class="profile-card__title" data-i18n="hero.entry3.title">
+                    王鸣笛 · 摄影师 / 剪辑师
+                  </h2>
+                  <p class="profile-card__subtitle" data-i18n="hero.entry3.subtitle">
+                    无人机航拍持证摄影师，为城市与自然提供沉浸式视觉记录。
+                  </p>
+                </header>
+                <blockquote class="profile-card__quote" data-i18n="hero.entry3.quote">
+                  “与鸣笛合作是一次快体验，他的脚本规划让拍摄流程顺畅高效。”
+                </blockquote>
+                <p class="profile-card__meta" data-i18n="hero.entry3.meta">—— 人形机器人项目 · 负责人</p>
+              </article>
+
+              <div class="profile-card__actions" role="group" aria-label="切换个人卡片">
+                <button
+                  class="profile-card__button"
+                  type="button"
+                  data-action="prev"
+                  aria-label="上一条"
+                  data-i18n-attr="aria-label:hero.actions.prev"
+                >
+                  <span aria-hidden="true">←</span>
+                </button>
+                <button
+                  class="profile-card__button"
+                  type="button"
+                  data-action="next"
+                  aria-label="下一条"
+                  data-i18n-attr="aria-label:hero.actions.next"
+                >
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
     </header>
 
     <main>

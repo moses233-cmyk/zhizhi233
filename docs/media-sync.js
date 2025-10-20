@@ -13,6 +13,62 @@ let refreshTimer;
 
 const galleryGrid = document.querySelector('.gallery-slider');
 const videoGrid = document.querySelector('.media-grid');
+const heroVideoEl = document.querySelector('[data-hero-video]');
+const heroVideoSourceEl = heroVideoEl ? heroVideoEl.querySelector('source') : null;
+const heroVideoFallback = heroVideoEl
+  ? {
+      src:
+        heroVideoEl.dataset.fallbackSrc ||
+        (heroVideoSourceEl ? heroVideoSourceEl.getAttribute('src') : heroVideoEl.getAttribute('src') || '') ||
+        '',
+      type:
+        heroVideoEl.dataset.fallbackType ||
+        (heroVideoSourceEl ? heroVideoSourceEl.getAttribute('type') : heroVideoEl.getAttribute('type') || '') ||
+        '',
+      poster: heroVideoEl.dataset.fallbackPoster || heroVideoEl.getAttribute('poster') || '',
+    }
+  : null;
+let heroVideoListenersBound = false;
+const heroVideoRetryState = {
+  src: '',
+  attempts: 0,
+  maxAttempts: 2,
+  lastError: null,
+  isPlaying: false,
+  retryTimer: null,
+  awaitingReady: false,
+};
+const heroDebugEnabled =
+  typeof window !== 'undefined' && window.__HERO_DEBUG__ !== undefined ? window.__HERO_DEBUG__ : true;
+const debugHero = (label, extra = {}) => {
+  if (!heroDebugEnabled || !heroVideoEl) return;
+  const base = {
+    readyState: heroVideoEl.readyState,
+    paused: heroVideoEl.paused,
+    currentTime: heroVideoEl.currentTime,
+    networkState: heroVideoEl.networkState,
+    buffered: heroVideoEl.buffered?.length ? heroVideoEl.buffered.end(heroVideoEl.buffered.length - 1) : 0,
+    dataset: { ...heroVideoEl.dataset },
+  };
+  console.debug(`[hero] ${label}`, Object.assign(base, extra));
+};
+const markHeroElement = () => {
+  if (!heroDebugEnabled || !heroVideoEl) return;
+  window.__heroVideo = heroVideoEl;
+  requestAnimationFrame(() => {
+    const rect = heroVideoEl.getBoundingClientRect();
+    const topElement = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    debugHero('bounds', {
+      rect: {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      },
+      topElement: topElement ? `${topElement.tagName.toLowerCase()}${topElement.className ? '.' + topElement.className.replace(/\s+/g, '.') : ''}` : null,
+    });
+  });
+};
 
 if (galleryGrid || videoGrid) {
   init();
@@ -98,6 +154,7 @@ async function renderMedia() {
 
     const mediaMap = new Map();
     const videos = [];
+    let heroCandidate = null;
 
     (mediaRes.data ?? []).forEach((item) => {
       const albumIds = mediaAlbumIds.get(item.id) ?? [];
@@ -115,6 +172,16 @@ async function renderMedia() {
 
       if (item.type === 'video') {
         videos.push(base);
+        const createdTime = getMediaPriorityTimestamp(base);
+        const candidateTime = heroCandidate ? getMediaPriorityTimestamp(heroCandidate) : Number.NEGATIVE_INFINITY;
+
+        if (base.is_featured) {
+          if (!heroCandidate || !heroCandidate.is_featured || createdTime >= candidateTime) {
+            heroCandidate = base;
+          }
+        } else if (!heroCandidate || (!heroCandidate.is_featured && createdTime >= candidateTime)) {
+          heroCandidate = base;
+        }
       }
     });
 
@@ -143,9 +210,11 @@ async function renderMedia() {
     renderImages(albumGroups, unassignedImages);
     renderVideos(videos);
     updateAlbumDropdown(albumRes.data);
+    updateHeroVideo(heroCandidate);
   } catch (error) {
     console.error('加载媒体内容失败', error);
     updateAlbumDropdown([]);
+    updateHeroVideo(null);
   }
 }
 
@@ -205,37 +274,92 @@ function renderImages(albumGroups, unassignedImages) {
   galleryGrid.innerHTML = '';
   lightboxController.unbind();
 
-  const sliderEntries = (albumGroups || [])
-    .filter((group) => Array.isArray(group.images) && group.images.length)
+  const sortByNewest = (a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+  const normalizedAlbums = (albumGroups ?? [])
     .map((group) => ({
-      group,
-      cover: group.images[0],
-    }));
+      ...group,
+      images: [...(group.images ?? [])].filter(Boolean).sort(sortByNewest),
+    }))
+    .filter((group) => group.images.length);
 
-  const hasSingles = Array.isArray(unassignedImages) && unassignedImages.length > 0;
+  const singles = [...(unassignedImages ?? [])]
+    .filter(Boolean)
+    .sort(sortByNewest);
 
-  if (!sliderEntries.length && !hasSingles) {
+  if (!normalizedAlbums.length && !singles.length) {
     galleryGrid.appendChild(createEmptyMessage());
     return;
   }
 
-  const appendSingles = () => {
+  if (normalizedAlbums.length) {
+    const viewport = document.createElement('div');
+    viewport.className = 'gallery-slider__viewport';
+
+    const track = document.createElement('div');
+    track.className = 'gallery-slider__track';
+
+    const createSlide = (group) => {
+      const cover = group.images[0];
+      const link = document.createElement('a');
+      link.className = 'gallery-slider__item';
+      link.href = `album.html?id=${encodeURIComponent(group.id)}`;
+      link.setAttribute('aria-label', `查看专辑「${group.title || '未命名专辑'}」`);
+      link.dataset.albumId = String(group.id);
+
+      const image = document.createElement('img');
+      image.className = 'gallery-slider__image';
+      image.src = cover.url;
+      image.alt = cover.title || group.title || '作品图像';
+      image.loading = 'lazy';
+
+      const label = document.createElement('span');
+      label.className = 'gallery-slider__label';
+      label.textContent = group.title || cover.title || '未命名专辑';
+
+      link.appendChild(image);
+      link.appendChild(label);
+
+      return link;
+    };
+
+    normalizedAlbums.forEach((group) => {
+      track.appendChild(createSlide(group));
+    });
+
+    if (normalizedAlbums.length > 1) {
+      normalizedAlbums.forEach((group) => {
+        const clone = createSlide(group);
+        clone.classList.add('is-duplicate');
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        track.appendChild(clone);
+      });
+
+      track.classList.add('is-animated');
+      const durationSeconds = Math.max(18, normalizedAlbums.length * 6);
+      track.style.setProperty('--gallery-scroll-duration', `${durationSeconds}s`);
+    }
+
+    viewport.appendChild(track);
+    galleryGrid.appendChild(viewport);
+  }
+
+  if (singles.length) {
     const singlesContainer = document.createElement('div');
     singlesContainer.className = 'gallery-slider__singles';
 
-    unassignedImages.forEach((item) => {
+    singles.forEach((item) => {
       const link = document.createElement('a');
       link.className = 'gallery-link gallery-slider__single';
       link.href = item.url;
       link.dataset.full = item.url;
-      link.dataset.caption =
-        item.description ||
-        item.title ||
-        '未分类 · 媒体图片';
+      link.dataset.caption = item.description || item.title || '未命名作品';
 
       const img = document.createElement('img');
       img.src = item.url;
-      img.alt = item.title || item.description || '未分类 图片';
+      img.alt = item.title || item.description || '未命名作品';
       img.loading = 'lazy';
 
       link.appendChild(img);
@@ -244,73 +368,6 @@ function renderImages(albumGroups, unassignedImages) {
 
     galleryGrid.appendChild(singlesContainer);
     lightboxController.bind(singlesContainer.querySelectorAll('.gallery-link'));
-  };
-
-  if (sliderEntries.length) {
-    const viewport = document.createElement('div');
-    viewport.className = 'gallery-slider__viewport';
-
-    const track = document.createElement('div');
-    track.className = 'gallery-slider__track';
-
-    const createSlide = (entry) => {
-      const { group, cover } = entry;
-      const slide = document.createElement('a');
-      slide.className = 'gallery-slider__item';
-
-      const labelTitle = group.title || (cover && cover.title) || '未命名相册';
-
-      if (group.id != null) {
-        slide.href = `album.html?id=${encodeURIComponent(group.id)}`;
-        slide.dataset.albumId = String(group.id);
-      } else {
-        slide.href = '#';
-        slide.setAttribute('aria-disabled', 'true');
-        slide.tabIndex = -1;
-      }
-
-      slide.setAttribute('aria-label', `查看相册「${labelTitle}」`);
-
-      const image = document.createElement('img');
-      image.className = 'gallery-slider__image';
-      image.src = cover && cover.url ? cover.url : '';
-      image.alt = (cover && cover.title) || labelTitle;
-      image.loading = 'lazy';
-
-      const label = document.createElement('span');
-      label.className = 'gallery-slider__label';
-      label.textContent = labelTitle;
-
-      slide.appendChild(image);
-      slide.appendChild(label);
-
-      return slide;
-    };
-
-    sliderEntries.forEach((entry) => {
-      track.appendChild(createSlide(entry));
-    });
-
-    if (sliderEntries.length > 1) {
-      sliderEntries.forEach((entry) => {
-        const cloned = createSlide(entry);
-        cloned.classList.add('is-duplicate');
-        cloned.setAttribute('aria-hidden', 'true');
-        cloned.tabIndex = -1;
-        track.appendChild(cloned);
-      });
-
-      track.classList.add('is-animated');
-      const durationSeconds = Math.max(18, sliderEntries.length * 6);
-      track.style.setProperty('--gallery-scroll-duration', `${durationSeconds}s`);
-    }
-
-    viewport.appendChild(track);
-    galleryGrid.appendChild(viewport);
-  }
-
-  if (hasSingles) {
-    appendSingles();
   }
 }
 function renderVideos(videos) {
@@ -340,12 +397,13 @@ function renderVideos(videos) {
     const videoEl = document.createElement('video');
     videoEl.className = 'video-highlight__video';
     videoEl.controls = true;
-    videoEl.preload = 'none';
+    videoEl.preload = 'metadata';
     videoEl.playsInline = true;
 
     const source = document.createElement('source');
-    source.src = item.url;
-    source.type = inferVideoMime(item.url);
+    const resolvedSrc = resolveVideoSource(item);
+    source.src = resolvedSrc || item.url || '';
+    source.type = resolveVideoMime(item) || inferVideoMime(resolvedSrc || item.url || '');
     videoEl.appendChild(source);
 
     const fallback = document.createElement('span');
@@ -372,6 +430,322 @@ function renderVideos(videos) {
 
   videoGrid.appendChild(fragment);
   document.dispatchEvent(new CustomEvent('videos:updated'));
+}
+
+function updateHeroVideo(media) {
+  if (!heroVideoEl) return;
+  ensureHeroVideoBindings();
+
+  const nextSrc = resolveVideoSource(media) || (heroVideoFallback ? heroVideoFallback.src : '') || '';
+  const nextType =
+    resolveVideoMime(media) || (media && media.url ? inferVideoMime(media.url) : heroVideoFallback?.type || '');
+  const nextPoster =
+    resolvePoster(media) || (heroVideoFallback ? heroVideoFallback.poster : '') || heroVideoEl.getAttribute('poster') || '';
+  const nextId = media && media.id ? String(media.id) : 'fallback';
+
+  if (!nextSrc) {
+    clearHeroVideoSource();
+    heroVideoRetryState.src = '';
+    heroVideoRetryState.attempts = 0;
+    heroVideoRetryState.lastError = null;
+    heroVideoEl.pause();
+    heroVideoEl.dataset.mediaId = 'fallback';
+    if (heroVideoFallback?.poster) {
+      heroVideoEl.setAttribute('poster', heroVideoFallback.poster);
+    }
+    debugHero('no-source-fallback', { nextId, fallbackPoster: heroVideoFallback?.poster });
+    return;
+  }
+
+  const currentSrc = heroVideoSourceEl
+    ? heroVideoSourceEl.getAttribute('src') || ''
+    : heroVideoEl.getAttribute('src') || '';
+  if (currentSrc === nextSrc && heroVideoEl.dataset.mediaId === nextId) {
+    heroVideoRetryState.src = nextSrc;
+    heroVideoRetryState.attempts = 0;
+    if (heroVideoEl.readyState < 2) {
+      heroVideoEl.load();
+    }
+    scheduleHeroAutoplay(true);
+    debugHero('reuse-source', { nextId, src: nextSrc });
+    return;
+  }
+
+  heroVideoRetryState.src = nextSrc;
+  heroVideoRetryState.attempts = 0;
+  heroVideoRetryState.lastError = null;
+  heroVideoRetryState.isPlaying = false;
+  heroVideoRetryState.awaitingReady = false;
+
+  heroVideoEl.dataset.mediaId = nextId;
+  prepareHeroVideoElement();
+  debugHero('update-source', { nextId, src: nextSrc, type: nextType });
+  if (heroVideoSourceEl) {
+    heroVideoSourceEl.setAttribute('src', nextSrc);
+    if (nextType) {
+      heroVideoSourceEl.setAttribute('type', nextType);
+    } else {
+      heroVideoSourceEl.removeAttribute('type');
+    }
+    heroVideoEl.removeAttribute('src');
+  } else {
+    heroVideoEl.setAttribute('src', nextSrc);
+    if (nextType) {
+      heroVideoEl.setAttribute('type', nextType);
+    } else {
+      heroVideoEl.removeAttribute('type');
+    }
+  }
+
+  if (nextPoster) {
+    heroVideoEl.setAttribute('poster', nextPoster);
+  } else if (heroVideoFallback?.poster) {
+    heroVideoEl.setAttribute('poster', heroVideoFallback.poster);
+  } else {
+    heroVideoEl.removeAttribute('poster');
+  }
+
+  heroVideoEl.load();
+  heroVideoEl.currentTime = 0;
+
+  requestAnimationFrame(() => {
+    scheduleHeroAutoplay(true);
+  });
+  markHeroElement();
+}
+
+function ensureHeroVideoBindings() {
+  if (!heroVideoEl || heroVideoListenersBound) return;
+
+  const markReady = () => {
+    heroVideoEl.classList.add('is-ready');
+    heroVideoRetryState.attempts = 0;
+    heroVideoRetryState.lastError = null;
+    debugHero('ready');
+  };
+
+  const handleRecoverableIssue = () => {
+    scheduleHeroRetry('recoverable');
+  };
+
+  heroVideoEl.addEventListener('loadedmetadata', () => {
+    markReady();
+    scheduleHeroAutoplay();
+    debugHero('loadedmetadata');
+  });
+  heroVideoEl.addEventListener('canplay', () => {
+    scheduleHeroAutoplay();
+    debugHero('canplay');
+  });
+  heroVideoEl.addEventListener('play', () => {
+    markReady();
+    heroVideoRetryState.isPlaying = true;
+    heroVideoRetryState.awaitingReady = false;
+    if (heroVideoRetryState.retryTimer) {
+      clearTimeout(heroVideoRetryState.retryTimer);
+      heroVideoRetryState.retryTimer = null;
+    }
+    debugHero('play');
+  });
+  heroVideoEl.addEventListener('playing', () => {
+    heroVideoRetryState.isPlaying = true;
+    debugHero('playing');
+  });
+  heroVideoEl.addEventListener('pause', () => {
+    heroVideoRetryState.isPlaying = false;
+    debugHero('pause');
+  });
+  heroVideoEl.addEventListener('stalled', handleRecoverableIssue);
+  heroVideoEl.addEventListener('suspend', handleRecoverableIssue);
+  heroVideoEl.addEventListener('waiting', handleRecoverableIssue);
+  heroVideoEl.addEventListener('abort', handleRecoverableIssue);
+  heroVideoEl.addEventListener('error', (event) => {
+    heroVideoRetryState.lastError = event?.target?.error || event?.detail || new Error('hero video error');
+    scheduleHeroRetry('error');
+    debugHero('error', { error: heroVideoRetryState.lastError });
+  });
+
+  heroVideoListenersBound = true;
+  markHeroElement();
+}
+
+function prepareHeroVideoElement() {
+  if (!heroVideoEl) return;
+  heroVideoEl.defaultMuted = true;
+  heroVideoEl.muted = true;
+  heroVideoEl.autoplay = true;
+  heroVideoEl.loop = true;
+  heroVideoEl.playsInline = true;
+  heroVideoEl.preload = 'auto';
+  heroVideoEl.controls = false;
+  heroVideoEl.disablePictureInPicture = true;
+  heroVideoEl.crossOrigin = 'anonymous';
+  heroVideoEl.setAttribute('crossorigin', 'anonymous');
+  heroVideoEl.setAttribute('muted', '');
+  heroVideoEl.setAttribute('autoplay', '');
+  heroVideoEl.setAttribute('loop', '');
+  heroVideoEl.setAttribute('preload', 'auto');
+  heroVideoEl.setAttribute('playsinline', '');
+  heroVideoEl.setAttribute('webkit-playsinline', '');
+  heroVideoEl.setAttribute('x5-playsinline', '');
+  heroVideoEl.setAttribute(
+    'controlslist',
+    'nodownload noplaybackrate noremoteplayback nofullscreen'
+  );
+  heroVideoEl.removeAttribute('controls');
+}
+
+function attemptHeroPlayback(resetTime = false) {
+  if (!heroVideoEl) return;
+  if (heroVideoEl.readyState < 2) {
+    scheduleHeroAutoplay(resetTime);
+    return;
+  }
+  if (heroVideoRetryState.isPlaying) return;
+  prepareHeroVideoElement();
+  if (resetTime) {
+    try {
+      heroVideoEl.currentTime = 0;
+    } catch (error) {
+      heroVideoRetryState.lastError = error;
+      debugHero('reset-current-time-error', { error });
+    }
+  }
+  try {
+    const playPromise = heroVideoEl.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.catch((error) => {
+        heroVideoRetryState.lastError = error;
+        debugHero('play-rejection', { error });
+      });
+    }
+    return playPromise;
+  } catch (error) {
+    heroVideoRetryState.lastError = error;
+    debugHero('play-throw', { error });
+    return null;
+  }
+}
+
+function scheduleHeroRetry(reason) {
+  if (!heroVideoEl) return;
+
+  if (!heroVideoRetryState.src) {
+    if (reason === 'error' && heroVideoFallback?.src && heroVideoEl.dataset.mediaId !== 'fallback') {
+      console.warn('Hero video fallback triggered without source context', heroVideoRetryState.lastError);
+      updateHeroVideo(null);
+    }
+    return;
+  }
+
+  if (heroVideoRetryState.attempts < heroVideoRetryState.maxAttempts - (reason === 'recoverable' ? 1 : 0)) {
+    heroVideoRetryState.attempts += 1;
+    if (heroVideoRetryState.retryTimer) {
+      clearTimeout(heroVideoRetryState.retryTimer);
+    }
+    const delay = reason === 'error' ? 320 : 200;
+    heroVideoRetryState.retryTimer = setTimeout(() => {
+      heroVideoRetryState.retryTimer = null;
+      if (heroVideoRetryState.isPlaying) return;
+      heroVideoEl.pause();
+      heroVideoEl.load();
+      heroVideoRetryState.isPlaying = false;
+      requestAnimationFrame(() => {
+        scheduleHeroAutoplay(true);
+      });
+    }, delay);
+    return;
+  }
+
+  if (reason === 'error' && heroVideoFallback?.src && heroVideoEl.dataset.mediaId !== 'fallback') {
+    console.warn('Hero video fallback triggered after retry', heroVideoRetryState.lastError);
+    heroVideoRetryState.src = '';
+    updateHeroVideo(null);
+  }
+}
+
+function clearHeroVideoSource() {
+  if (heroVideoSourceEl) {
+    heroVideoSourceEl.removeAttribute('src');
+    heroVideoSourceEl.removeAttribute('type');
+  }
+  heroVideoEl.removeAttribute('src');
+  heroVideoEl.removeAttribute('type');
+}
+
+function scheduleHeroAutoplay(resetTime = false) {
+  if (!heroVideoEl) return;
+  if (heroVideoEl.readyState >= 2) {
+    attemptHeroPlayback(resetTime);
+    return;
+  }
+  if (heroVideoRetryState.awaitingReady) return;
+  heroVideoRetryState.awaitingReady = true;
+  debugHero('awaiting-ready', { resetTime });
+
+  const onReady = () => {
+    heroVideoRetryState.awaitingReady = false;
+    heroVideoEl.removeEventListener('canplay', onReady);
+    heroVideoEl.removeEventListener('loadeddata', onReady);
+    attemptHeroPlayback(resetTime);
+    debugHero('ready-listener-fired');
+  };
+
+  heroVideoEl.addEventListener('canplay', onReady, { once: true });
+  heroVideoEl.addEventListener('loadeddata', onReady, { once: true });
+}
+
+function getMediaPriorityTimestamp(media) {
+  if (!media) return Number.NEGATIVE_INFINITY;
+  return new Date(
+    media.updated_at ||
+      media.updatedAt ||
+      media.modified_at ||
+      media.modifiedAt ||
+      media.created_at ||
+      media.createdAt ||
+      0
+  ).getTime();
+}
+
+function resolvePoster(media) {
+  if (!media) return '';
+  return media.poster_url || media.poster || media.thumbnail_url || media.preview_url || '';
+}
+
+function resolveVideoMime(media) {
+  if (!media) return '';
+  if (media.mime_type) return media.mime_type;
+  if (media.content_type) return media.content_type;
+  if (media.type && media.type.includes('/')) return media.type;
+  if (media.url) return inferVideoMime(media.url);
+  return '';
+}
+
+function resolveVideoSource(media) {
+  if (!media) return '';
+  const candidates = [
+    media.streaming_url,
+    media.stream_url,
+    media.playback_url,
+    media.hls_url,
+    media.embed_url,
+    media.public_url,
+    media.publicUrl,
+    media.url,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  if (Array.isArray(media.sources)) {
+    const found = media.sources.find((source) => source && typeof source.url === 'string' && source.url.trim());
+    if (found) {
+      return found.url.trim();
+    }
+  }
+  return '';
 }
 
 function createEmptyMessage() {
@@ -587,3 +961,4 @@ const lightboxController = (() => {
 
   return { bind, unbind };
 })();
+

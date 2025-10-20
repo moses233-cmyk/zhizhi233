@@ -92,6 +92,25 @@
           </div>
         </header>
 
+        <div
+          data-upload-progress
+          hidden
+          class="rounded-3xl border border-accent-500/40 bg-accent-600/10 p-4 text-xs text-white/80 backdrop-blur"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <p data-upload-progress-label class="truncate font-medium text-white/90">
+              正在上传文件...
+            </p>
+            <span data-upload-progress-percent class="tabular-nums text-white/70">0%</span>
+          </div>
+          <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div
+              data-upload-progress-bar
+              class="h-full w-0 rounded-full bg-accent-500 shadow-[0_0_12px_rgba(59,130,246,0.6)] transition-all duration-200"
+            ></div>
+          </div>
+        </div>
+
         <section
           class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]"
           aria-label="相册管理"
@@ -182,6 +201,28 @@
             >0</span>
           </div>
 
+          <div
+            data-storage-overview
+            class="grid gap-3 text-sm text-white/70 sm:grid-cols-3"
+            hidden
+          >
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-white/50">所有文件总体积</p>
+              <p data-storage-total-size class="mt-2 text-2xl font-semibold text-white">0 B</p>
+              <p class="mt-1 text-[11px] text-white/40">包含已上传的全部媒体资源</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-white/50">已选相册总体积</p>
+              <p data-storage-selected-size class="mt-2 text-2xl font-semibold text-white">0 B</p>
+              <p data-storage-selected-count class="mt-1 text-[11px] text-white/40">已选 0 个相册</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-white/50">最近文件体积</p>
+              <p data-storage-latest-size class="mt-2 text-2xl font-semibold text-white">0 B</p>
+              <p data-storage-latest-name class="mt-1 truncate text-[11px] text-white/40">尚未上传文件</p>
+            </div>
+          </div>
+
           <p
             data-library-empty
             class="rounded-2xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-center text-sm text-white/50"
@@ -193,16 +234,6 @@
           <div data-album-library class="flex flex-col gap-4"></div>
         </section>
 
-        <section
-          class="rounded-3xl border border-white/5 bg-gradient-to-br from-white/10 to-white/5 p-6 backdrop-blur-xl"
-        >
-          <h2 class="text-lg font-semibold text-white">下一步规划</h2>
-          <ol class="mt-4 space-y-3 text-sm text-white/70">
-            <li>1. 连接 Supabase Storage，上传图片 / 视频。</li>
-            <li>2. 为媒体资源添加标签、分类与描述信息。</li>
-            <li>3. 构建媒体审核流程，控制前台展示。</li>
-          </ol>
-        </section>
       </main>
     </div>
 
