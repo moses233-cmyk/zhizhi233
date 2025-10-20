@@ -11,7 +11,7 @@ let supabaseClient;
 let realtimeChannel;
 let refreshTimer;
 
-const galleryGrid = document.querySelector('.gallery-grid');
+const galleryGrid = document.querySelector('.gallery-slider');
 const videoGrid = document.querySelector('.media-grid');
 
 if (galleryGrid || videoGrid) {
@@ -140,114 +140,105 @@ function renderImages(images, albumOrder) {
     }
   });
 
+  const sortByNewest = (a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
   albumGroups.forEach((group) => {
-    group.images.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    group.images.sort(sortByNewest);
   });
-  unassignedGroup.images.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  unassignedGroup.images.sort(sortByNewest);
 
-  const stacks = albumGroups.filter((group) => group.images.length);
-  if (unassignedGroup.images.length) {
-    stacks.push(unassignedGroup);
-  }
+  const sliderEntries = albumGroups
+    .filter((group) => group.images.length)
+    .map((group) => ({
+      group,
+      cover: group.images[0],
+    }));
 
-  if (!stacks.length) {
+  if (!sliderEntries.length) {
+    if (unassignedGroup.images.length) {
+      const singlesContainer = document.createElement('div');
+      singlesContainer.className = 'gallery-slider__singles';
+
+      unassignedGroup.images.forEach((item) => {
+        const link = document.createElement('a');
+        link.className = 'gallery-link gallery-slider__single';
+        link.href = item.url;
+        link.dataset.full = item.url;
+        link.dataset.caption =
+          item.description ||
+          item.title ||
+          `${unassignedGroup.title} · 媒体图片`;
+
+        const img = document.createElement('img');
+        img.src = item.url;
+        img.alt = item.title || item.description || `${unassignedGroup.title} 图片`;
+        img.loading = 'lazy';
+
+        link.appendChild(img);
+        singlesContainer.appendChild(link);
+      });
+
+      galleryGrid.appendChild(singlesContainer);
+      lightboxController.bind(singlesContainer.querySelectorAll('.gallery-link'));
+      return;
+    }
+
     galleryGrid.appendChild(createEmptyMessage());
-    lightboxController.unbind();
     return;
   }
 
-  const fragment = document.createDocumentFragment();
+  const viewport = document.createElement('div');
+  viewport.className = 'gallery-slider__viewport';
 
-  stacks.forEach((group) => {
-    const section = document.createElement('article');
-    section.className = 'album-stack';
+  const track = document.createElement('div');
+  track.className = 'gallery-slider__track';
 
-    const frame = document.createElement('div');
-    frame.className = 'album-stack__frame';
+  const createSlide = (entry) => {
+    const { group, cover } = entry;
+    const link = document.createElement('a');
+    link.className = 'gallery-slider__item';
+    link.href = `album.html?id=${encodeURIComponent(group.id)}`;
+    link.setAttribute('aria-label', `查看相册「${group.title || '未命名相册'}」`);
+    link.dataset.albumId = String(group.id);
 
-    const stack = document.createElement('div');
-    stack.className = 'album-stack__stack';
+    const image = document.createElement('img');
+    image.className = 'gallery-slider__image';
+    image.src = cover.url;
+    image.alt = cover.title || group.title || '相册封面图片';
+    image.loading = 'lazy';
 
-    const isAlbum = Boolean(group.id);
-    const maxPreview = 4;
+    const label = document.createElement('span');
+    label.className = 'gallery-slider__label';
+    label.textContent = group.title || cover.title || '未命名相册';
 
-    group.images.forEach((item, index) => {
-      const elementTag = isAlbum ? 'div' : 'a';
-      const itemElement = document.createElement(elementTag);
-      itemElement.className = 'album-stack__item';
+    link.appendChild(image);
+    link.appendChild(label);
 
-      if (isAlbum) {
-        itemElement.setAttribute('aria-hidden', 'true');
-      } else {
-        itemElement.classList.add('gallery-link');
-        itemElement.href = item.url;
-        itemElement.dataset.full = item.url;
-        itemElement.dataset.caption =
-          item.description ||
-          item.title ||
-          `${group.title} · 媒体图片`;
-      }
+    return link;
+  };
 
-      itemElement.style.setProperty('--stack-offset', Math.min(index, maxPreview - 1));
-
-      if (index === 0) {
-        itemElement.classList.add('album-stack__item--primary');
-      } else if (index < maxPreview) {
-        itemElement.classList.add('album-stack__item--visible');
-      } else {
-        itemElement.classList.add('album-stack__item--hidden');
-      }
-
-      const img = document.createElement('img');
-      img.src = item.url;
-      img.alt = item.title || item.description || `${group.title} 图片`;
-      img.loading = 'lazy';
-
-      itemElement.appendChild(img);
-
-      const overlay = document.createElement('div');
-      overlay.className = 'album-stack__overlay';
-
-      const overlayTitle = document.createElement('p');
-      overlayTitle.className = 'album-stack__overlay-title';
-      overlayTitle.textContent = item.title || group.title || '';
-      overlay.appendChild(overlayTitle);
-
-      const metaText =
-        (item.albumNames && item.albumNames.length && item.albumNames.join(' · ')) ||
-        item.createdLabel ||
-        item.description ||
-        '';
-      if (metaText) {
-        const overlayMeta = document.createElement('span');
-        overlayMeta.className = 'album-stack__overlay-meta';
-        overlayMeta.textContent = metaText;
-        overlay.appendChild(overlayMeta);
-      }
-
-      itemElement.appendChild(overlay);
-      stack.appendChild(itemElement);
-    });
-
-    if (isAlbum) {
-      const link = document.createElement('a');
-      link.className = 'album-stack__frame-link';
-      link.href = `album.html?id=${encodeURIComponent(group.id)}`;
-      link.setAttribute('aria-label', `查看相册「${group.title || '未命名相册'}」`);
-      link.appendChild(stack);
-      frame.appendChild(link);
-    } else {
-      frame.appendChild(stack);
-    }
-
-    section.appendChild(frame);
-    fragment.appendChild(section);
+  sliderEntries.forEach((entry) => {
+    track.appendChild(createSlide(entry));
   });
 
-  galleryGrid.appendChild(fragment);
-  lightboxController.bind(galleryGrid.querySelectorAll('.gallery-link'));
-}
+  if (sliderEntries.length > 1) {
+    sliderEntries.forEach((entry) => {
+      const cloned = createSlide(entry);
+      cloned.classList.add('is-duplicate');
+      cloned.setAttribute('aria-hidden', 'true');
+      cloned.tabIndex = -1;
+      track.appendChild(cloned);
+    });
 
+    track.classList.add('is-animated');
+    const durationSeconds = Math.max(18, sliderEntries.length * 6);
+    track.style.setProperty('--gallery-scroll-duration', `${durationSeconds}s`);
+  }
+
+  viewport.appendChild(track);
+  galleryGrid.appendChild(viewport);
+}
 function renderVideos(videos) {
   if (!videoGrid) return;
   videoGrid.innerHTML = '';
