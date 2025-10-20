@@ -171,7 +171,9 @@ async function renderMedia() {
       mediaMap.set(item.id, base);
 
       if (item.type === 'video') {
-        videos.push(base);
+        if (!base.is_featured) {
+          videos.push(base);
+        }
         const createdTime = getMediaPriorityTimestamp(base);
         const candidateTime = heroCandidate ? getMediaPriorityTimestamp(heroCandidate) : Number.NEGATIVE_INFINITY;
 
