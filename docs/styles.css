@@ -612,7 +612,7 @@ background-clip: text;           /* ✅ 标准属性 */
   }
 
   .section {
-    padding: 64px 24px;
+    padding: 56px 20px;
   }
 
   .section__header {
@@ -631,19 +631,6 @@ background-clip: text;           /* ✅ 标准属性 */
   .media-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     justify-items: stretch;
-  }
-
-  .wave-divider {
-    width: min(80vw, 580px);
-    margin: 56px auto;
-  }
-
-  .wave-divider__interaction {
-    inset: calc(-1 * clamp(90px, 14vw, 150px)) 0;
-  }
-
-  .wave-divider__svg {
-    inset: calc(-1 * clamp(150px, 24vw, 240px)) 0;
   }
 
   main {
@@ -775,20 +762,6 @@ background-clip: text;           /* ✅ 标准属性 */
     justify-items: stretch;
   }
 
-  .wave-divider {
-    width: calc(100% - 48px);
-    margin: 40px auto;
-  }
-
-  .wave-divider__interaction {
-    inset: calc(-1 * clamp(70px, 18vw, 140px)) 0;
-  }
-
-  .wave-divider__svg {
-    inset: calc(-1 * clamp(120px, 28vw, 220px)) 0;
-    height: clamp(140px, 40vw, 240px);
-  }
-
   .contact-card {
     grid-template-columns: minmax(0, 1fr);
     padding: 28px 18px;
@@ -905,7 +878,7 @@ background-clip: text;           /* ✅ 标准属性 */
 }
 
 .section {
-  padding: clamp(64px, 12vw, 120px) clamp(24px, 6vw, 120px);
+  padding: clamp(72px, 12vw, 128px) clamp(24px, 6vw, 120px);
   background: transparent;
 }
 
@@ -935,51 +908,6 @@ background-clip: text;           /* ✅ 标准属性 */
 .section__header p {
   color: var(--color-text-muted);
   max-width: 520px;
-}
-
-.wave-divider {
-  position: relative;
-  width: min(70vw, 720px);
-  margin: clamp(48px, 10vw, 72px) auto;
-  height: 1px;
-  color: rgba(37, 99, 235, 0.4);
-}
-
-.wave-divider__interaction {
-  position: absolute;
-  inset: calc(-1 * clamp(60px, 12vw, 120px)) 0;
-  cursor: pointer;
-  z-index: 1;
-  touch-action: none;
-}
-
-.wave-divider__svg {
-  position: absolute;
-  inset: calc(-1 * clamp(120px, 20vw, 200px)) 0;
-  width: 100%;
-  height: clamp(160px, 28vw, 280px);
-  pointer-events: none;
-  filter: none;
-}
-
-.wave-divider__svg::before,
-.wave-divider__svg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: transparent;
-}
-
-.wave-divider__path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  opacity: 0.9;
-  transition: stroke 0.3s ease;
-}
-
-.wave-divider:hover {
-  color: rgba(79, 70, 229, 0.65);
 }
 
 .section--accent .section__header p {
@@ -1923,4 +1851,3 @@ body[data-theme='dark'] .footer {
 .album-stack__item:focus-visible .album-stack__overlay {
   opacity: 0;
 }
-
