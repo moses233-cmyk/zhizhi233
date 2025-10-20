@@ -300,6 +300,97 @@ const nightSkyState = {
   resizeHandler: null,
 };
 
+const daylightRaysState = {
+  container: null,
+  raysElement: null,
+  emitter: null,
+};
+
+class Rays {
+  constructor(container) {
+    this.container = container;
+    this.width = 0;
+    this.height = 0;
+    this.rays = [];
+    this.animationId = null;
+    this.resizeHandler = this.resizeHandler.bind(this);
+    this.tick = this.tick.bind(this);
+    this.init();
+  }
+
+  init() {
+    this.resizeHandler();
+    window.addEventListener('resize', this.resizeHandler);
+    this.animationId = requestAnimationFrame(this.tick);
+  }
+
+  resizeHandler() {
+    this.width = this.container.clientWidth;
+    this.height = this.container.clientHeight;
+    this.emit();
+  }
+
+  emit() {
+    this.rays = [];
+    this.totalRays = Math.floor(this.height * 0.75);
+
+    for (let index = 0; index < this.totalRays; index += 1) {
+      this.rays.push(new Ray(this));
+    }
+  }
+
+  tick() {
+    let path = '';
+
+    this.rays.forEach((ray) => {
+      ray.tick();
+      path += ray.d;
+    });
+
+    const clipPath = `path("${path}")`;
+    this.container.style.clipPath = clipPath;
+    this.container.style.webkitClipPath = clipPath;
+    this.animationId = requestAnimationFrame(this.tick);
+  }
+
+  destroy() {
+    window.removeEventListener('resize', this.resizeHandler);
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+    this.container.style.clipPath = '';
+    this.container.style.webkitClipPath = '';
+  }
+}
+
+class Ray {
+  constructor(emitter) {
+    this.emitter = emitter;
+    const gap = 12;
+    this.x = Math.random() * this.emitter.width;
+    this.y = Math.floor(Math.random() * ((this.emitter.height / gap) + 1)) * gap;
+    this.width = 50 * Math.random();
+    this.velocity = 0.25 + this.width / 50;
+    this.d = '';
+  }
+
+  update() {
+    this.x += this.velocity;
+    if (this.x > this.emitter.width) {
+      this.x = -this.width;
+    }
+  }
+
+  draw() {
+    this.d = `M ${this.x},${this.y} h ${this.width} v 1 h -${this.width} z `;
+  }
+
+  tick() {
+    this.update();
+    this.draw();
+  }
+}
+
 function createNightSkyBackground() {
   if (!window.THREE || nightSkyState.renderer) {
     return;
@@ -466,11 +557,57 @@ function destroyNightSkyBackground() {
   }
 }
 
-function updateNightSky(theme) {
+function createDaylightBackground() {
+  if (daylightRaysState.emitter) {
+    return;
+  }
+
+  const container = document.createElement('div');
+  container.className = 'daylight-background';
+  container.setAttribute('aria-hidden', 'true');
+
+  const raysElement = document.createElement('div');
+  raysElement.className = 'daylight-background__rays';
+  container.appendChild(raysElement);
+
+  document.body.prepend(container);
+
+  daylightRaysState.container = container;
+  daylightRaysState.raysElement = raysElement;
+  daylightRaysState.emitter = new Rays(raysElement);
+
+  requestAnimationFrame(() => container.classList.add('is-active'));
+}
+
+function destroyDaylightBackground() {
+  if (!daylightRaysState.emitter) {
+    return;
+  }
+
+  daylightRaysState.emitter.destroy();
+
+  const { container } = daylightRaysState;
+  if (container) {
+    container.classList.remove('is-active');
+    setTimeout(() => {
+      if (container.parentElement) {
+        container.parentElement.removeChild(container);
+      }
+    }, 300);
+  }
+
+  daylightRaysState.container = null;
+  daylightRaysState.raysElement = null;
+  daylightRaysState.emitter = null;
+}
+
+function updateBackgrounds(theme) {
   if (theme === 'dark') {
+    destroyDaylightBackground();
     createNightSkyBackground();
   } else {
     destroyNightSkyBackground();
+    createDaylightBackground();
   }
 }
 
@@ -505,7 +642,7 @@ function applyTheme(theme) {
   root.dataset.theme = theme;
   updateThemeToggleUI(theme);
   localStorage.setItem('theme', theme);
-  updateNightSky(theme);
+  updateBackgrounds(theme);
 }
 
 function toggleTheme() {
