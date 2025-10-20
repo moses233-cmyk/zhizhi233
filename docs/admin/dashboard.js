@@ -3,10 +3,6 @@ import { supabase } from './app.js';
 const BUCKET_ID = 'media';
 const MEDIA_TABLE = 'media_items';
 
-const imagesListEl = document.querySelector('[data-images-list]');
-const videosListEl = document.querySelector('[data-videos-list]');
-const imagesCountEl = document.querySelector('[data-images-count]');
-const videosCountEl = document.querySelector('[data-videos-count]');
 const uploadButton = document.querySelector('[data-upload-button]');
 const uploadInput = document.querySelector('[data-upload-input]');
 const albumPickerEl = document.querySelector('[data-album-picker]');
@@ -16,17 +12,21 @@ const clearAlbumsButton = document.querySelector('[data-clear-albums]');
 const createAlbumForm = document.querySelector('[data-create-album-form]');
 const albumTitleInput = document.querySelector('[data-album-title]');
 const albumDescriptionInput = document.querySelector('[data-album-description]');
+const libraryContainer = document.querySelector('[data-album-library]');
+const libraryEmptyEl = document.querySelector('[data-library-empty]');
+const libraryCountEl = document.querySelector('[data-library-count]');
 
 const STORAGE_PUBLIC_PREFIX = `/storage/v1/object/public/${BUCKET_ID}/`;
 
-if (!imagesListEl || !videosListEl) {
-  console.warn('媒体列表容器未找到，跳过后台界面初始化。');
+if (!libraryContainer) {
+  console.warn('资源库容器未找到，拖拽排序功能将不可用。');
 }
 
 const mediaState = {
   items: [],
   isUploading: false,
   isFetching: false,
+  map: new Map(),
 };
 
 const albumState = {
@@ -35,6 +35,17 @@ const albumState = {
   isCreating: false,
   isFetching: false,
 };
+
+const albumItemsState = {
+  byAlbum: new Map(),
+  byMedia: new Map(),
+};
+
+const libraryUiState = {
+  expanded: new Set(),
+};
+
+let dragContext = null;
 
 function ensureToastContainer() {
   let container = document.querySelector('[data-toast-container]');
@@ -90,16 +101,6 @@ function formatDate(value) {
   } catch {
     return value;
   }
-}
-
-function renderEmptyState(target, type) {
-  if (!target) return;
-  target.innerHTML = `
-    <li class="flex items-center justify-between rounded-2xl border border-white/12 bg-black/20 px-4 py-3 text-white/60">
-      <span>暂无${type === 'image' ? '图片' : '视频'}资源</span>
-      <span class="text-xs uppercase tracking-[0.2em] text-white/30">waiting</span>
-    </li>
-  `;
 }
 
 function renderAlbumStats() {
@@ -223,6 +224,7 @@ async function refreshAlbums({ preserveSelection = true } = {}) {
 
     renderAlbumPicker();
     renderAlbumStats();
+    renderAlbumLibrary();
   } catch (error) {
     console.error('获取相册列表失败', error);
     showMessage(`获取相册列表失败：${error.message ?? error}`, 'error', 6000);
@@ -231,76 +233,702 @@ async function refreshAlbums({ preserveSelection = true } = {}) {
   }
 }
 
-function renderMediaList(type) {
-  const listEl = type === 'image' ? imagesListEl : videosListEl;
-  const countEl = type === 'image' ? imagesCountEl : videosCountEl;
-  if (!listEl) return;
+function getAlbumKey(albumId) {
+  return albumId ?? '__unassigned__';
+}
 
-  const items = mediaState.items.filter((item) => item.type === type);
+function updateLibraryIndicators() {
+  if (libraryCountEl) {
+    libraryCountEl.textContent = String(mediaState.items.length);
+  }
 
-  if (!items.length) {
-    renderEmptyState(listEl, type);
-    if (countEl) countEl.textContent = '0';
+  if (libraryEmptyEl) {
+    libraryEmptyEl.hidden = mediaState.items.length > 0;
+  }
+}
+
+function renderAlbumLibrary() {
+  if (!libraryContainer) return;
+
+  updateLibraryIndicators();
+  libraryContainer.innerHTML = '';
+
+  const fragment = document.createDocumentFragment();
+  const shouldAutoExpand = libraryUiState.expanded.size === 0;
+
+  albumState.items.forEach((album, index) => {
+    const entries = albumItemsState.byAlbum.get(album.id) ?? [];
+    const items = entries
+      .map((entry) => {
+        const media = mediaState.map.get(entry.mediaId);
+        if (!media) return null;
+        return {
+          media,
+          assignment: {
+            albumId: album.id,
+            position: entry.position,
+            createdAt: entry.created_at,
+          },
+        };
+      })
+      .filter(Boolean);
+
+    const panel = createAlbumPanel(album, items, {
+      autoOpen: shouldAutoExpand && index === 0,
+    });
+    fragment.appendChild(panel);
+  });
+
+  const unassignedItems = mediaState.items
+    .filter((item) => !albumItemsState.byMedia.has(item.id))
+    .map((media) => ({
+      media,
+      assignment: { albumId: null, position: null, createdAt: media.created_at },
+    }));
+
+  const unassignedPanel = createAlbumPanel(
+    { id: null, title: '未分类', description: '' },
+    unassignedItems,
+    {
+      isUnassigned: true,
+      autoOpen: shouldAutoExpand && !albumState.items.length,
+    }
+  );
+  fragment.appendChild(unassignedPanel);
+
+  libraryContainer.appendChild(fragment);
+}
+
+function createAlbumPanel(album, entries, options = {}) {
+  const { isUnassigned = false, autoOpen = false } = options;
+  const albumId = album.id ?? null;
+  const key = getAlbumKey(albumId);
+
+  const details = document.createElement('details');
+  details.className = 'group rounded-2xl border border-white/10 bg-black/30 backdrop-blur';
+  details.dataset.albumPanel = key;
+  if (libraryUiState.expanded.has(key) || autoOpen) {
+    details.open = true;
+  }
+
+  details.addEventListener('toggle', () => {
+    if (details.open) {
+      libraryUiState.expanded.add(key);
+    } else {
+      libraryUiState.expanded.delete(key);
+    }
+  });
+
+  const summary = document.createElement('summary');
+  summary.className =
+    'flex cursor-pointer select-none items-center justify-between gap-4 rounded-2xl px-4 py-3 text-white/80 transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60';
+
+  const header = document.createElement('div');
+  header.className = 'min-w-0 flex-1';
+
+  const titleEl = document.createElement('p');
+  titleEl.className = 'truncate text-base font-semibold text-white';
+  titleEl.textContent = album.title || '未命名相册';
+  header.appendChild(titleEl);
+
+  if (album.description && !isUnassigned) {
+    const desc = document.createElement('p');
+    desc.className = 'mt-1 line-clamp-2 text-xs text-white/50';
+    desc.textContent = album.description;
+    header.appendChild(desc);
+  }
+
+  summary.appendChild(header);
+
+  const summaryActions = document.createElement('div');
+  summaryActions.className = 'flex shrink-0 items-center gap-2';
+
+  const countBadge = document.createElement('span');
+  countBadge.className = 'rounded-full bg-white/10 px-3 py-1 text-xs text-white/60';
+  countBadge.textContent = `${entries.length} 项`;
+  summaryActions.appendChild(countBadge);
+
+  if (!isUnassigned) {
+    const renameButton = document.createElement('button');
+    renameButton.type = 'button';
+    renameButton.dataset.renameAlbum = albumId;
+    renameButton.className =
+      'rounded-full border border-white/20 px-3 py-1 text-xs text-white/70 transition hover:border-white/60 hover:text-white';
+    renameButton.textContent = '重命名';
+    renameButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      promptRenameAlbum(albumId, album.title);
+    });
+    summaryActions.appendChild(renameButton);
+  }
+
+  const indicator = document.createElement('span');
+  indicator.className =
+    'ml-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs text-white/60 transition group-open:rotate-90';
+  indicator.innerHTML = '&#9656;';
+  summaryActions.appendChild(indicator);
+
+  summary.appendChild(summaryActions);
+  details.appendChild(summary);
+
+  const content = document.createElement('div');
+  content.className = 'px-4 pb-4';
+
+  const list = document.createElement('ul');
+  list.className = 'flex flex-col gap-3 pt-3';
+  list.dataset.albumDropzone = 'true';
+  list.dataset.albumId = albumId ?? '';
+  list.dataset.allowReorder = isUnassigned ? 'false' : 'true';
+
+  if (!entries.length) {
+    const empty = document.createElement('li');
+    empty.dataset.placeholder = 'true';
+    empty.className =
+      'rounded-2xl border border-dashed border-white/15 bg-white/5 px-4 py-4 text-center text-xs text-white/50';
+    empty.textContent = isUnassigned
+      ? '未分类资源会出现在此处，拖动资源到相册即可完成归类。'
+      : '相册暂无资源，拖拽媒体到此处即可添加。';
+    list.appendChild(empty);
+  } else {
+    entries.forEach((entry) => {
+      const itemElement = createMediaItemElement(entry.media, { albumId });
+      list.appendChild(itemElement);
+    });
+  }
+
+  content.appendChild(list);
+  details.appendChild(content);
+
+  return details;
+}
+
+function createMediaItemElement(media, context) {
+  const item = document.createElement('li');
+  item.dataset.mediaItem = media.id;
+  item.dataset.albumId = context.albumId ?? '';
+  item.dataset.mediaType = media.type;
+  item.draggable = true;
+  item.className =
+    'group flex cursor-grab items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 shadow-sm transition hover:border-white/30 hover:bg-white/10 active:cursor-grabbing';
+
+  const info = document.createElement('div');
+  info.className = 'min-w-0 flex-1';
+
+  const titleRow = document.createElement('div');
+  titleRow.className = 'flex items-center gap-2';
+
+  const indicator = document.createElement('span');
+  indicator.className = `inline-flex h-2.5 w-2.5 shrink-0 rounded-full ${
+    media.type === 'image' ? 'bg-emerald-400' : 'bg-sky-400'
+  }`;
+  titleRow.appendChild(indicator);
+
+  const title = document.createElement('p');
+  title.className = 'truncate text-sm font-medium text-white';
+  title.textContent = media.title || media.url;
+  titleRow.appendChild(title);
+
+  info.appendChild(titleRow);
+
+  const meta = document.createElement('p');
+  meta.className = 'mt-1 text-[11px] uppercase tracking-widest text-white/40';
+  const createdLabel = media.created_at ? formatDate(media.created_at) : '未知时间';
+  meta.textContent = `${media.type} · ${media.uploader_email ?? '未知'} · ${createdLabel}`;
+  info.appendChild(meta);
+
+  const tags = document.createElement('div');
+  tags.className = 'mt-2 flex flex-wrap gap-1';
+  if (media.albumNames?.length) {
+    media.albumNames.forEach((name) => {
+      const badge = document.createElement('span');
+      badge.className = 'rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-white/60';
+      badge.textContent = `#${name}`;
+      tags.appendChild(badge);
+    });
+  } else {
+    const placeholder = document.createElement('span');
+    placeholder.className = 'text-[11px] text-white/40';
+    placeholder.textContent = '未分类';
+    tags.appendChild(placeholder);
+  }
+  info.appendChild(tags);
+
+  item.appendChild(info);
+
+  const actions = document.createElement('div');
+  actions.className = 'flex shrink-0 flex-wrap items-center justify-end gap-2';
+
+  const preview = document.createElement('a');
+  preview.href = media.url;
+  preview.target = '_blank';
+  preview.rel = 'noopener';
+  preview.className =
+    'rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 transition hover:border-white/60 hover:text-white';
+  preview.textContent = '预览';
+  actions.appendChild(preview);
+
+  const renameButton = document.createElement('button');
+  renameButton.type = 'button';
+  renameButton.dataset.renameMedia = media.id;
+  renameButton.className =
+    'rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 transition hover:border-white/60 hover:text-white';
+  renameButton.textContent = '重命名';
+  actions.appendChild(renameButton);
+
+  const assignButton = document.createElement('button');
+  assignButton.type = 'button';
+  assignButton.dataset.manageAlbums = media.id;
+  assignButton.className =
+    'rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/70 transition hover:border-white/60 hover:text-white';
+  assignButton.textContent = '相册';
+  actions.appendChild(assignButton);
+
+  const deleteButton = document.createElement('button');
+  deleteButton.type = 'button';
+  deleteButton.dataset.deleteMedia = media.id;
+  deleteButton.className =
+    'rounded-full border border-rose-400/30 px-3 py-1.5 text-xs font-medium text-rose-200 transition hover:border-rose-400 hover:bg-rose-400/20 hover:text-white';
+  deleteButton.textContent = '删除';
+  actions.appendChild(deleteButton);
+
+  item.appendChild(actions);
+
+  return item;
+}
+
+async function promptRenameAlbum(albumId, currentTitle = '') {
+  if (!albumId) return;
+  const nextTitle = window.prompt('请输入新的相册名称：', currentTitle || '');
+  if (nextTitle === null) return;
+  const trimmed = nextTitle.trim();
+  if (!trimmed) {
+    showMessage('相册名称不能为空。', 'error');
     return;
   }
 
-  const albumMap = new Map(albumState.items.map((album) => [album.id, album.title]));
+  if (trimmed === currentTitle) {
+    showMessage('相册名称未发生变化。', 'info', 3000);
+    return;
+  }
 
-  listEl.innerHTML = items
-    .map((item) => {
-      const tags = (item.albumIds || [])
-        .map((albumId) => albumMap.get(albumId))
-        .filter(Boolean);
-      const badgeMarkup = tags.length
-        ? tags
-            .map(
-              (title) =>
-                `<span class="rounded-full bg-white/10 px-2 py-0.5 text-[11px] text-white/60">#${title}</span>`
-            )
-            .join('')
-        : '<span class="text-[11px] text-white/40">未分类</span>';
-
-      return `
-      <li class="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 transition hover:border-white/30 hover:bg-black/40">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <span class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full ${item.type === 'image' ? 'bg-emerald-400' : 'bg-sky-400'}"></span>
-            <p class="truncate text-sm font-medium text-white">${item.title ?? item.url}</p>
-          </div>
-          <p class="mt-1 line-clamp-2 text-xs text-white/50">${item.description || '尚未填写描述'}</p>
-          <p class="mt-1 text-[11px] uppercase tracking-widest text-white/30">
-            ${item.type} · ${item.uploader_email ?? '未知'} · ${formatDate(item.created_at)}
-          </p>
-          <div class="mt-2 flex flex-wrap gap-1">${badgeMarkup}</div>
-        </div>
-        <div class="flex shrink-0 items-center gap-2">
-          <a
-            href="${item.url}"
-            target="_blank"
-            rel="noopener"
-            class="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/80 transition hover:border-white/60 hover:text-white"
-          >
-            预览
-          </a>
-          <button
-            type="button"
-            data-delete-media="${item.id}"
-            class="rounded-full border border-rose-400/30 px-3 py-1.5 text-xs font-medium text-rose-200 transition hover:border-rose-400 hover:bg-rose-400/20 hover:text-white"
-          >
-            删除
-          </button>
-        </div>
-      </li>
-    `;
-    })
-    .join('');
-
-  if (countEl) countEl.textContent = String(items.length);
+  try {
+    const { error } = await supabase.from('albums').update({ title: trimmed }).eq('id', albumId);
+    if (error) throw error;
+    showMessage('相册名称已更新。', 'success');
+    await refreshAlbums({ preserveSelection: true });
+    await refreshMediaItems();
+  } catch (error) {
+    console.error('重命名相册失败', error);
+    showMessage(`重命名相册失败：${error.message ?? error}`, 'error', 6000);
+  }
 }
 
-function syncLists() {
-  renderMediaList('image');
-  renderMediaList('video');
+async function promptRenameMedia(mediaId, currentTitle = '') {
+  if (!mediaId) return;
+  const nextTitle = window.prompt('请输入新的资源名称：', currentTitle || '');
+  if (nextTitle === null) return;
+  const trimmed = nextTitle.trim();
+  if (!trimmed) {
+    showMessage('资源名称不能为空。', 'error');
+    return;
+  }
+
+  if (trimmed === currentTitle) {
+    showMessage('资源名称未发生变化。', 'info', 3000);
+    return;
+  }
+
+  try {
+    const { error } = await supabase.from(MEDIA_TABLE).update({ title: trimmed }).eq('id', mediaId);
+    if (error) throw error;
+    showMessage('资源名称已更新。', 'success');
+    await refreshMediaItems();
+  } catch (error) {
+    console.error('重命名资源失败', error);
+    showMessage(`重命名资源失败：${error.message ?? error}`, 'error', 6000);
+  }
+}
+
+function getMediaById(mediaId) {
+  if (!mediaId) return null;
+  return mediaState.map.get(mediaId) ?? mediaState.items.find((item) => item.id === mediaId) ?? null;
+}
+
+function handleLibraryClick(event) {
+  const deleteButton = event.target.closest('[data-delete-media]');
+  if (deleteButton) {
+    const mediaId = deleteButton.dataset.deleteMedia;
+    const targetItem = getMediaById(mediaId);
+    if (!targetItem) {
+      showMessage('未找到对应的媒体记录。', 'error');
+      return;
+    }
+
+    const confirmed = window.confirm(`确定要删除「${targetItem.title ?? targetItem.url}」吗？操作不可撤销。`);
+    if (!confirmed) return;
+
+    deleteMediaItem(targetItem);
+    return;
+  }
+
+  const renameButton = event.target.closest('[data-rename-media]');
+  if (renameButton) {
+    const mediaId = renameButton.dataset.renameMedia;
+    const targetItem = getMediaById(mediaId);
+    if (!targetItem) {
+      showMessage('未找到对应的媒体记录。', 'error');
+      return;
+    }
+    promptRenameMedia(mediaId, targetItem.title ?? '');
+    return;
+  }
+
+  const manageButton = event.target.closest('[data-manage-albums]');
+  if (manageButton) {
+    const mediaId = manageButton.dataset.manageAlbums;
+    const targetItem = getMediaById(mediaId);
+    if (!targetItem) {
+      showMessage('未找到对应的媒体记录。', 'error');
+      return;
+    }
+    openAlbumAssignmentDialog(targetItem);
+  }
+}
+
+function openAlbumAssignmentDialog(media) {
+  if (!media) return;
+
+  const overlay = document.createElement('div');
+  overlay.className =
+    'fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 text-sm text-white backdrop-blur-sm';
+
+  const dialog = document.createElement('div');
+  dialog.className = 'w-full max-w-md rounded-3xl border border-white/10 bg-night-800 p-6 shadow-2xl';
+
+  const header = document.createElement('div');
+  header.className = 'flex items-start justify-between gap-3';
+  const title = document.createElement('h3');
+  title.className = 'text-lg font-semibold text-white';
+  title.textContent = '管理资源相册';
+  header.appendChild(title);
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className =
+    'inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/60 transition hover:border-white/40 hover:text-white';
+  closeButton.innerHTML = '&times;';
+  header.appendChild(closeButton);
+
+  dialog.appendChild(header);
+
+  const description = document.createElement('p');
+  description.className = 'mt-2 text-xs text-white/60';
+  description.textContent = '勾选要展示的相册，不选择则资源会归为未分类。';
+  dialog.appendChild(description);
+
+  const form = document.createElement('form');
+  form.className = 'mt-4 flex flex-col gap-3';
+
+  if (!albumState.items.length) {
+    const emptyNotice = document.createElement('p');
+    emptyNotice.className = 'rounded-2xl border border-dashed border-white/15 bg-white/5 px-4 py-3 text-center text-white/60';
+    emptyNotice.textContent = '当前尚未创建任何相册，请先创建相册后再进行归类。';
+    form.appendChild(emptyNotice);
+  } else {
+    albumState.items.forEach((album) => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'album';
+      checkbox.value = album.id;
+      checkbox.checked = media.albumIds?.includes(album.id);
+      checkbox.className = 'h-4 w-4 rounded border-white/30 bg-transparent text-accent-500 focus:ring-accent-500/60';
+
+      const info = document.createElement('div');
+      info.className = 'min-w-0 flex-1';
+
+      const titleText = document.createElement('p');
+      titleText.className = 'truncate text-sm text-white';
+      titleText.textContent = album.title || '未命名相册';
+      info.appendChild(titleText);
+
+      if (album.description) {
+        const desc = document.createElement('p');
+        desc.className = 'truncate text-xs text-white/50';
+        desc.textContent = album.description;
+        info.appendChild(desc);
+      }
+
+      label.appendChild(checkbox);
+      label.appendChild(info);
+      form.appendChild(label);
+    });
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'mt-4 flex items-center justify-end gap-2';
+
+  const cancelButton = document.createElement('button');
+  cancelButton.type = 'button';
+  cancelButton.className =
+    'rounded-full border border-white/15 px-4 py-1.5 text-xs text-white/70 transition hover:border-white/40 hover:text-white';
+  cancelButton.textContent = '取消';
+  actions.appendChild(cancelButton);
+
+  const submitButton = document.createElement('button');
+  submitButton.type = 'submit';
+  submitButton.className =
+    'rounded-full bg-accent-600 px-5 py-1.5 text-xs font-medium text-white transition hover:bg-accent-500 disabled:opacity-60';
+  submitButton.textContent = '保存';
+  actions.appendChild(submitButton);
+
+  form.appendChild(actions);
+  dialog.appendChild(form);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  const close = () => {
+    overlay.remove();
+  };
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      close();
+    }
+  });
+
+  closeButton.addEventListener('click', () => {
+    close();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    close();
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!albumState.items.length) {
+      close();
+      return;
+    }
+
+    const selected = Array.from(form.querySelectorAll('input[name="album"]:checked')).map((input) => input.value);
+
+    try {
+      await updateMediaAlbums(media.id, selected);
+      showMessage('资源相册已更新。', 'success');
+      close();
+      await Promise.all([refreshMediaItems(), refreshAlbums({ preserveSelection: true })]);
+    } catch (error) {
+      console.error('更新资源相册失败', error);
+      showMessage(`更新资源相册失败：${error.message ?? error}`, 'error', 6000);
+    }
+  });
+}
+
+async function updateMediaAlbums(mediaId, desiredAlbumIds) {
+  const cleanedIds = Array.from(new Set((desiredAlbumIds ?? []).filter(Boolean)));
+  const currentEntries = albumItemsState.byMedia.get(mediaId) ?? [];
+  const currentIds = currentEntries.map((entry) => entry.album_id);
+
+  const currentSet = new Set(currentIds);
+  const desiredSet = new Set(cleanedIds);
+
+  const toRemove = currentIds.filter((id) => !desiredSet.has(id));
+  const toAdd = cleanedIds.filter((id) => !currentSet.has(id));
+
+  if (toRemove.length) {
+    const { error: deleteError } = await supabase
+      .from('album_items')
+      .delete()
+      .eq('media_item_id', mediaId)
+      .in('album_id', toRemove);
+    if (deleteError) throw deleteError;
+  }
+
+  if (toAdd.length) {
+    const rows = toAdd.map((albumId) => ({
+      album_id: albumId,
+      media_item_id: mediaId,
+      position: determineNextPosition(albumId),
+    }));
+    const { error: insertError } = await supabase.from('album_items').insert(rows);
+    if (insertError) throw insertError;
+  }
+}
+
+function determineNextPosition(albumId) {
+  const entries = albumItemsState.byAlbum.get(albumId) ?? [];
+  const numericPositions = entries
+    .map((entry) => (Number.isFinite(entry.position) ? entry.position : null))
+    .filter((value) => value !== null);
+  if (numericPositions.length) {
+    return Math.max(...numericPositions) + 1;
+  }
+  return entries.length + 1;
+}
+
+function normalizeAlbumId(value) {
+  if (!value) return null;
+  if (value === '__unassigned__') return null;
+  return value;
+}
+
+function getDragAfterElement(container, y) {
+  const elements = Array.from(container.querySelectorAll('[data-media-item]:not(.is-dragging)'));
+  return elements.reduce(
+    (closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset, element: child };
+      }
+      return closest;
+    },
+    { offset: Number.NEGATIVE_INFINITY, element: null }
+  ).element;
+}
+
+function clearDropzoneHighlights() {
+  document
+    .querySelectorAll('[data-album-dropzone]')
+    .forEach((zone) => {
+      zone.style.outline = '';
+      zone.style.outlineOffset = '';
+    });
+}
+
+function handleDragStart(event) {
+  const item = event.target.closest('[data-media-item]');
+  if (!item) return;
+  dragContext = {
+    mediaId: item.dataset.mediaItem,
+    albumId: normalizeAlbumId(item.dataset.albumId),
+  };
+  item.classList.add('is-dragging');
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', item.dataset.mediaItem || 'media');
+  }
+}
+
+function handleDragEnd(event) {
+  const item = event.target.closest('[data-media-item]');
+  item?.classList.remove('is-dragging');
+  dragContext = null;
+  clearDropzoneHighlights();
+}
+
+function handleDragOver(event) {
+  if (!dragContext) return;
+  const dropzone = event.target.closest('[data-album-dropzone]');
+  if (!dropzone) return;
+  event.preventDefault();
+
+  const dragging = libraryContainer?.querySelector('[data-media-item].is-dragging');
+  if (!dragging) return;
+
+  dropzone.querySelectorAll('[data-placeholder]').forEach((el) => el.remove());
+
+  const afterElement = getDragAfterElement(dropzone, event.clientY);
+  if (!afterElement) {
+    dropzone.appendChild(dragging);
+  } else {
+    dropzone.insertBefore(dragging, afterElement);
+  }
+
+  dropzone.style.outline = '2px dashed rgba(59,130,246,0.6)';
+  dropzone.style.outlineOffset = '4px';
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+}
+
+async function handleDrop(event) {
+  if (!dragContext) return;
+  const dropzone = event.target.closest('[data-album-dropzone]');
+  if (!dropzone) return;
+  event.preventDefault();
+
+  const targetAlbumId = normalizeAlbumId(dropzone.dataset.albumId);
+  dropzone.querySelectorAll('[data-placeholder]').forEach((el) => el.remove());
+
+  const orderedIds = Array.from(dropzone.querySelectorAll('[data-media-item]')).map((el) => el.dataset.mediaItem);
+  const mediaId = dragContext.mediaId;
+
+  try {
+    if (dragContext.albumId === targetAlbumId) {
+      if (targetAlbumId) {
+        await persistAlbumArrangement(targetAlbumId, orderedIds);
+        showMessage('已更新排序。', 'success');
+      } else {
+        showMessage('资源保持未分类状态。', 'info', 2500);
+      }
+    } else {
+      if (dragContext.albumId) {
+        const { error: removeError } = await supabase
+          .from('album_items')
+          .delete()
+          .eq('album_id', dragContext.albumId)
+          .eq('media_item_id', mediaId);
+        if (removeError) throw removeError;
+      }
+
+      if (targetAlbumId) {
+        await persistAlbumArrangement(targetAlbumId, orderedIds);
+        showMessage('资源已移动到新的相册。', 'success');
+      } else {
+        showMessage('资源已移出相册，归为未分类。', 'success');
+      }
+    }
+  } catch (error) {
+    console.error('更新资源排序失败', error);
+    showMessage(`更新资源排序失败：${error.message ?? error}`, 'error', 6000);
+  } finally {
+    dragContext = null;
+    clearDropzoneHighlights();
+    await Promise.all([refreshMediaItems(), refreshAlbums({ preserveSelection: true })]);
+  }
+}
+
+function handleDragLeave(event) {
+  const dropzone = event.target.closest('[data-album-dropzone]');
+  if (!dropzone) return;
+  if (event.relatedTarget && dropzone.contains(event.relatedTarget)) {
+    return;
+  }
+  dropzone.style.outline = '';
+  dropzone.style.outlineOffset = '';
+}
+
+async function persistAlbumArrangement(albumId, orderedIds) {
+  if (!albumId) return;
+  const uniqueOrderedIds = Array.from(new Set(orderedIds));
+  const updates = uniqueOrderedIds.map((mediaId, index) => ({
+    album_id: albumId,
+    media_item_id: mediaId,
+    position: index + 1,
+  }));
+
+  const existingEntries = albumItemsState.byAlbum.get(albumId) ?? [];
+  const existingIds = new Set(existingEntries.map((entry) => entry.mediaId));
+  const desiredSet = new Set(uniqueOrderedIds);
+  const removedIds = Array.from(existingIds).filter((id) => !desiredSet.has(id));
+
+  const { error } = await supabase.from('album_items').upsert(updates, { onConflict: 'album_id,media_item_id' });
+  if (error) throw error;
+
+  if (removedIds.length) {
+    const { error: deleteError } = await supabase
+      .from('album_items')
+      .delete()
+      .eq('album_id', albumId)
+      .in('media_item_id', removedIds);
+    if (deleteError) throw deleteError;
+  }
 }
 
 function toggleUploadState(loading) {
@@ -342,25 +970,73 @@ async function refreshMediaItems() {
         .from(MEDIA_TABLE)
         .select('*')
         .order('created_at', { ascending: false }),
-      supabase.from('album_items').select('album_id, media_item_id'),
+      supabase
+        .from('album_items')
+        .select('album_id, media_item_id, position, created_at')
+        .order('position', { ascending: true, nullsFirst: true })
+        .order('created_at', { ascending: true }),
     ]);
 
     if (mediaRes.error) throw mediaRes.error;
     if (albumItemRes.error) throw albumItemRes.error;
 
+    const albumTitleMap = new Map(albumState.items.map((album) => [album.id, album.title]));
     const albumMapping = new Map();
+    const assignmentsByAlbum = new Map();
+    const assignmentsByMedia = new Map();
+
     (albumItemRes.data ?? []).forEach((row) => {
-      const list = albumMapping.get(row.media_item_id) ?? [];
-      list.push(row.album_id);
-      albumMapping.set(row.media_item_id, list);
+      const albumList = albumMapping.get(row.media_item_id) ?? [];
+      albumList.push(row.album_id);
+      albumMapping.set(row.media_item_id, albumList);
+
+      const albumEntries = assignmentsByAlbum.get(row.album_id) ?? [];
+      albumEntries.push({
+        mediaId: row.media_item_id,
+        position: row.position,
+        created_at: row.created_at,
+      });
+      assignmentsByAlbum.set(row.album_id, albumEntries);
+
+      const mediaEntries = assignmentsByMedia.get(row.media_item_id) ?? [];
+      mediaEntries.push({
+        album_id: row.album_id,
+        position: row.position,
+        created_at: row.created_at,
+      });
+      assignmentsByMedia.set(row.media_item_id, mediaEntries);
     });
 
-    mediaState.items = (mediaRes.data ?? []).map((item) => ({
-      ...item,
-      albumIds: albumMapping.get(item.id) ?? [],
-    }));
+    assignmentsByAlbum.forEach((list) => {
+      list.sort((a, b) => {
+        const posA = Number.isFinite(a.position) ? a.position : Number.MAX_SAFE_INTEGER;
+        const posB = Number.isFinite(b.position) ? b.position : Number.MAX_SAFE_INTEGER;
+        if (posA !== posB) {
+          return posA - posB;
+        }
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        return timeA - timeB;
+      });
+    });
 
-    syncLists();
+    mediaState.items = (mediaRes.data ?? []).map((item) => {
+      const albumIds = albumMapping.get(item.id) ?? [];
+      const albumNames = albumIds
+        .map((albumId) => albumTitleMap.get(albumId))
+        .filter(Boolean);
+      return {
+        ...item,
+        albumIds,
+        albumNames,
+      };
+    });
+
+    mediaState.map = new Map(mediaState.items.map((item) => [item.id, item]));
+    albumItemsState.byAlbum = assignmentsByAlbum;
+    albumItemsState.byMedia = assignmentsByMedia;
+
+    renderAlbumLibrary();
   } catch (error) {
     console.error('获取媒体列表失败', error);
     showMessage(`获取媒体列表失败：${error.message ?? error}`, 'error', 6000);
@@ -554,23 +1230,6 @@ function handleFileSelection(event) {
   uploadFiles(files);
 }
 
-function handleMediaListClick(event) {
-  const button = event.target.closest('[data-delete-media]');
-  if (!button) return;
-  const mediaId = button.dataset.deleteMedia;
-  const targetItem = mediaState.items.find((entry) => entry.id === mediaId);
-
-  if (!targetItem) {
-    showMessage('未找到对应的媒体记录。', 'error');
-    return;
-  }
-
-  const confirmed = window.confirm(`确定要删除「${targetItem.title ?? targetItem.url}」吗？操作不可撤销。`);
-  if (!confirmed) return;
-
-  deleteMediaItem(targetItem);
-}
-
 function initUploadControls() {
   if (uploadButton) {
     uploadButton.addEventListener('click', handleUploadClick);
@@ -581,9 +1240,14 @@ function initUploadControls() {
   }
 }
 
-function initListInteractions() {
-  imagesListEl?.addEventListener('click', handleMediaListClick);
-  videosListEl?.addEventListener('click', handleMediaListClick);
+function initLibraryInteractions() {
+  if (!libraryContainer) return;
+  libraryContainer.addEventListener('click', handleLibraryClick);
+  libraryContainer.addEventListener('dragstart', handleDragStart);
+  libraryContainer.addEventListener('dragend', handleDragEnd);
+  libraryContainer.addEventListener('dragover', handleDragOver);
+  libraryContainer.addEventListener('drop', handleDrop);
+  libraryContainer.addEventListener('dragleave', handleDragLeave);
 }
 
 function initAlbumControls() {
@@ -597,11 +1261,11 @@ function initAlbumControls() {
 }
 
 async function initDashboardInterface() {
-  syncLists();
   renderAlbumPicker();
   renderAlbumStats();
+  renderAlbumLibrary();
   initUploadControls();
-  initListInteractions();
+  initLibraryInteractions();
   initAlbumControls();
   await refreshAlbums({ preserveSelection: true });
   await refreshMediaItems();
@@ -613,7 +1277,11 @@ supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
     mediaState.items = [];
     albumState.selected.clear();
-    syncLists();
+    mediaState.map = new Map();
+    albumItemsState.byAlbum = new Map();
+    albumItemsState.byMedia = new Map();
+    libraryUiState.expanded.clear();
+    renderAlbumLibrary();
     renderAlbumPicker();
     showMessage('已退出登录。', 'info');
   }

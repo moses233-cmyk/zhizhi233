@@ -4,188 +4,253 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>管理员登录 · Admin</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+      integrity="sha384-2gS1v/kcTsGVf4FJGUF2COc3AJuwTkGm5fbtVn7YpmgNTMi9OqH1EnZhDNFvV3Rh"
+      crossorigin="anonymous"
+    />
     <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #f8fafc;
-        --card-bg: rgba(255, 255, 255, 0.82);
-        --text: #0f172a;
-        --muted: #475569;
-        --border: rgba(148, 163, 184, 0.45);
-        --accent: #2563eb;
-        --accent-hover: #1d4ed8;
-        --accent-text: #ffffff;
-        --error: #ef4444;
-        --success: #16a34a;
-        --shadow: rgba(15, 23, 42, 0.12);
-        --input-bg: rgba(255, 255, 255, 0.95);
-        --placeholder: rgba(71, 85, 105, 0.65);
-        --focus-ring: rgba(37, 99, 235, 0.28);
-        font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC",
-          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #0f172a;
-          --card-bg: rgba(15, 23, 42, 0.88);
-          --text: #e2e8f0;
-          --muted: #cbd5f5;
-          --border: rgba(148, 163, 184, 0.25);
-          --accent: #60a5fa;
-          --accent-hover: #3b82f6;
-          --shadow: rgba(8, 12, 22, 0.55);
-          --input-bg: rgba(15, 23, 42, 0.92);
-          --placeholder: rgba(203, 213, 245, 0.55);
-          --focus-ring: rgba(96, 165, 250, 0.32);
-        }
-      }
-
       * {
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
+        text-decoration: none;
+        list-style-type: none;
+        border: none;
+        outline: none;
+        font-family: Poppins, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: #fff;
       }
 
       body {
-        margin: 0;
         min-height: 100vh;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--bg);
-        color: var(--text);
-        padding: 2.5rem 1.5rem;
+        background-image: url("https://i.postimg.cc/RFqSM2rc/bg.jpg");
+        background-size: cover;
+        background-position: center;
+        padding: 1.5rem;
       }
 
-      main {
-        width: min(380px, 100%);
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 1.25rem;
-        padding: 2.5rem 2rem;
-        backdrop-filter: blur(14px);
-        box-shadow: 0 24px 60px var(--shadow);
+      .content {
+        width: min(420px, 100%);
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(13px);
+        padding: 30px 35px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
 
-      h1 {
-        margin: 0 0 0.75rem;
-        font-size: 1.6rem;
-        letter-spacing: -0.02em;
+      .content h1 {
+        font-size: 38px;
+        font-weight: 700;
         text-align: center;
+        margin-bottom: 10px;
       }
 
-      .description {
-        margin: 0 0 1.75rem;
-        font-size: 0.95rem;
-        color: var(--muted);
+      .content .description {
+        font-size: 16px;
         text-align: center;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 20px;
       }
 
-      form {
-        display: grid;
-        gap: 1rem;
+      .content form {
+        display: flex;
+        flex-direction: column;
       }
 
-      label {
-        display: grid;
-        gap: 0.45rem;
-        font-size: 0.9rem;
-        color: var(--muted);
-      }
-
-      input[type="email"] {
+      .input-box {
+        position: relative;
         width: 100%;
-        border: 1px solid var(--border);
-        border-radius: 0.9rem;
-        padding: 0.85rem 1rem;
-        font-size: 1rem;
-        background: var(--input-bg);
-        color: var(--text);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        height: 55px;
+        margin: 20px 0;
       }
 
-      input[type="email"]::placeholder {
-        color: var(--placeholder);
+      .input-box input {
+        background: transparent;
+        width: 100%;
+        height: 100%;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        padding: 20px 50px 20px 20px;
+        font-size: 16px;
+        color: #fff;
       }
 
-      input[type="email"]:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--focus-ring);
+      input::placeholder {
+        color: #fff;
+        font-size: 16px;
       }
 
-      button[type="submit"] {
-        border: none;
-        border-radius: 0.9rem;
-        padding: 0.85rem 1rem;
-        font-size: 1rem;
-        font-weight: 600;
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-        color: var(--accent-text);
+      .input-box i {
+        position: absolute;
+        top: 50%;
+        right: 18px;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: #fff;
         cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
 
-      button[type="submit"]:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+      .remember {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px 0 0;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
       }
 
-      button[type="submit"]:disabled {
+      .remember label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+
+      .remember label input {
+        accent-color: #fff;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+      }
+
+      .remember a {
+        color: #fff;
+      }
+
+      .remember a:hover {
+        text-decoration: underline;
+      }
+
+      .btnn {
+        display: inline-block;
+        background: #fff;
+        color: #0a2862;
+        width: 100%;
+        border-radius: 30px;
+        font-size: 16px;
+        height: 45px;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        margin: 25px 0 15px;
+      }
+
+      .btnn:disabled {
         opacity: 0.6;
         cursor: wait;
-        transform: none;
-        box-shadow: none;
+      }
+
+      .button {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .button a {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .button a:hover {
+        opacity: 0.85;
       }
 
       .status {
-        min-height: 1.5rem;
-        margin-top: 1.5rem;
-        font-size: 0.88rem;
+        min-height: 24px;
+        margin-top: 18px;
+        font-size: 14px;
         text-align: center;
-        color: var(--muted);
+        color: rgba(255, 255, 255, 0.85);
       }
 
       .status[data-variant="error"] {
-        color: var(--error);
+        color: #ff8585;
       }
 
       .status[data-variant="success"] {
-        color: var(--success);
+        color: #8af5b5;
+      }
+
+      input::-ms-reveal,
+      input::-ms-clear {
+        display: none;
+      }
+
+      input::-webkit-credentials-auto-fill-button,
+      input::-webkit-clear-button,
+      input::-webkit-inner-spin-button,
+      input::-webkit-contacts-auto-fill-button {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none;
+        height: 0;
+        width: 0;
+        margin: 0;
+        padding: 0;
       }
     </style>
   </head>
   <body data-page="login">
-    <main data-login-view>
-      <h1>管理员登录</h1>
-      <p class="description">请输入管理员邮箱与密码进行登录。</p>
+    <div class="content" data-login-view>
       <form data-login-form novalidate>
-        <label>
-          <span>管理员邮箱</span>
+        <h1>管理员登录</h1>
+        <p class="description">请输入管理员邮箱与密码进行登录。</p>
+        <div class="input-box">
           <input
             data-email-input
             type="email"
             name="email"
             required
             autocomplete="email"
-            placeholder="moses233@qq.com"
+            placeholder="管理员邮箱"
             inputmode="email"
           />
-        </label>
-        <label>
-          <span>登录密码</span>
+          <i class="ri-user-fill" aria-hidden="true"></i>
+        </div>
+        <div class="input-box">
           <input
             data-password-input
+            id="password"
             type="password"
             name="password"
             required
             autocomplete="current-password"
-            placeholder="请输入密码"
+            placeholder="登录密码"
           />
-        </label>
-        <button type="submit">立即登录</button>
+          <i class="ri-eye-off-fill toggle-password" id="togglePassword" aria-hidden="true"></i>
+        </div>
+        <div class="remember">
+          <label>
+            <input type="checkbox" />
+            记住我
+          </label>
+          <a href="#">忘记密码？</a>
+        </div>
+        <button type="submit" class="btnn">立即登录</button>
+        <div class="button" aria-hidden="true">
+          <a href="#"><i class="ri-google-fill"></i>Google</a>
+          <span>—</span>
+          <a href="#"><i class="ri-facebook-fill"></i>Facebook</a>
+        </div>
+        <p class="status" data-status aria-live="polite"></p>
       </form>
-      <p class="status" data-status aria-live="polite"></p>
-    </main>
+    </div>
 
     <script>
       window.__SB__ = {
@@ -193,6 +258,20 @@
         anonKey:
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZ3p0bWFlbmhpZWVoeXJjbGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4MTc5MzUsImV4cCI6MjA3NjM5MzkzNX0.D1GxzSnYesnpflM3tbOWTk7BOopPyn6iqGv6X0K6Ej8",
       };
+    </script>
+    <script>
+      const passwordInput = document.getElementById("password");
+      const togglePasswordButton = document.getElementById("togglePassword");
+
+      if (passwordInput && togglePasswordButton) {
+        togglePasswordButton.addEventListener("click", () => {
+          const isPassword = passwordInput.type === "password";
+          passwordInput.type = isPassword ? "text" : "password";
+          togglePasswordButton.className = isPassword
+            ? "ri-eye-fill toggle-password"
+            : "ri-eye-off-fill toggle-password";
+        });
+      }
     </script>
     <script type="module" src="./app.js"></script>
   </body>

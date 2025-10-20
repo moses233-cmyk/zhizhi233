@@ -58,7 +58,11 @@ async function renderMedia() {
     const [mediaRes, albumRes, albumItemsRes] = await Promise.all([
       supabaseClient.from('media_items').select('*').order('created_at', { ascending: false }),
       supabaseClient.from('albums').select('id, title'),
-      supabaseClient.from('album_items').select('album_id, media_item_id'),
+      supabaseClient
+        .from('album_items')
+        .select('album_id, media_item_id, position, created_at')
+        .order('position', { ascending: true, nullsFirst: true })
+        .order('created_at', { ascending: true }),
     ]);
 
     if (mediaRes.error) throw mediaRes.error;
@@ -66,15 +70,33 @@ async function renderMedia() {
     if (albumItemsRes.error) throw albumItemsRes.error;
 
     const albumTitleMap = new Map((albumRes.data ?? []).map((album) => [album.id, album.title]));
+    const assignmentsByAlbum = new Map();
     const mediaAlbumIds = new Map();
+
     (albumItemsRes.data ?? []).forEach((row) => {
-      const list = mediaAlbumIds.get(row.media_item_id) ?? [];
-      list.push(row.album_id);
-      mediaAlbumIds.set(row.media_item_id, list);
+      const mediaList = mediaAlbumIds.get(row.media_item_id) ?? [];
+      mediaList.push(row.album_id);
+      mediaAlbumIds.set(row.media_item_id, mediaList);
+
+      const albumList = assignmentsByAlbum.get(row.album_id) ?? [];
+      albumList.push(row);
+      assignmentsByAlbum.set(row.album_id, albumList);
     });
 
-    const albumOrder = albumRes.data ?? [];
-    const images = [];
+    assignmentsByAlbum.forEach((list) => {
+      list.sort((a, b) => {
+        const posA = Number.isFinite(a.position) ? a.position : Number.MAX_SAFE_INTEGER;
+        const posB = Number.isFinite(b.position) ? b.position : Number.MAX_SAFE_INTEGER;
+        if (posA !== posB) {
+          return posA - posB;
+        }
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        return timeA - timeB;
+      });
+    });
+
+    const mediaMap = new Map();
     const videos = [];
 
     (mediaRes.data ?? []).forEach((item) => {
@@ -89,155 +111,154 @@ async function renderMedia() {
         createdLabel: formatDate(item.created_at),
       };
 
+      mediaMap.set(item.id, base);
+
       if (item.type === 'video') {
         videos.push(base);
-      } else {
-        images.push(base);
       }
     });
 
-    renderImages(images, albumOrder);
+    const albumGroups = (albumRes.data ?? []).map((album) => {
+      const assignments = assignmentsByAlbum.get(album.id) ?? [];
+      const orderedImages = assignments
+        .map((assignment) => mediaMap.get(assignment.media_item_id))
+        .filter((media) => media && media.type !== 'video');
+      return {
+        id: album.id,
+        title: album.title || '未命名相册',
+        images: orderedImages,
+      };
+    });
+
+    const unassignedImages = [];
+    mediaMap.forEach((media) => {
+      if (media.type === 'video') return;
+      if (!media.albumIds || !media.albumIds.length) {
+        unassignedImages.push(media);
+      }
+    });
+
+    unassignedImages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    renderImages(albumGroups, unassignedImages);
     renderVideos(videos);
   } catch (error) {
     console.error('加载媒体内容失败', error);
   }
 }
 
-function renderImages(images, albumOrder) {
+function renderImages(albumGroups, unassignedImages) {
   if (!galleryGrid) return;
   galleryGrid.innerHTML = '';
   lightboxController.unbind();
 
-  const albumGroups = [];
-  const albumGroupMap = new Map();
-
-  (albumOrder || []).forEach((album) => {
-    const group = {
-      id: album.id,
-      title: album.title || '未命名相册',
-      images: [],
-    };
-    albumGroupMap.set(album.id, group);
-    albumGroups.push(group);
-  });
-
-  const unassignedGroup = {
-    id: null,
-    title: '未分类',
-    images: [],
-  };
-
-  images.forEach((item) => {
-    if (item.albumIds && item.albumIds.length) {
-      item.albumIds.forEach((albumId) => {
-        const group = albumGroupMap.get(albumId);
-        if (group) {
-          group.images.push(item);
-        }
-      });
-    } else {
-      unassignedGroup.images.push(item);
-    }
-  });
-
-  const sortByNewest = (a, b) =>
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-
-  albumGroups.forEach((group) => {
-    group.images.sort(sortByNewest);
-  });
-  unassignedGroup.images.sort(sortByNewest);
-
-  const sliderEntries = albumGroups
-    .filter((group) => group.images.length)
+  const sliderEntries = (albumGroups || [])
+    .filter((group) => Array.isArray(group.images) && group.images.length)
     .map((group) => ({
       group,
       cover: group.images[0],
     }));
 
-  if (!sliderEntries.length) {
-    if (unassignedGroup.images.length) {
-      const singlesContainer = document.createElement('div');
-      singlesContainer.className = 'gallery-slider__singles';
+  const hasSingles = Array.isArray(unassignedImages) && unassignedImages.length > 0;
 
-      unassignedGroup.images.forEach((item) => {
-        const link = document.createElement('a');
-        link.className = 'gallery-link gallery-slider__single';
-        link.href = item.url;
-        link.dataset.full = item.url;
-        link.dataset.caption =
-          item.description ||
-          item.title ||
-          `${unassignedGroup.title} · 媒体图片`;
-
-        const img = document.createElement('img');
-        img.src = item.url;
-        img.alt = item.title || item.description || `${unassignedGroup.title} 图片`;
-        img.loading = 'lazy';
-
-        link.appendChild(img);
-        singlesContainer.appendChild(link);
-      });
-
-      galleryGrid.appendChild(singlesContainer);
-      lightboxController.bind(singlesContainer.querySelectorAll('.gallery-link'));
-      return;
-    }
-
+  if (!sliderEntries.length && !hasSingles) {
     galleryGrid.appendChild(createEmptyMessage());
     return;
   }
 
-  const viewport = document.createElement('div');
-  viewport.className = 'gallery-slider__viewport';
+  const appendSingles = () => {
+    const singlesContainer = document.createElement('div');
+    singlesContainer.className = 'gallery-slider__singles';
 
-  const track = document.createElement('div');
-  track.className = 'gallery-slider__track';
+    unassignedImages.forEach((item) => {
+      const link = document.createElement('a');
+      link.className = 'gallery-link gallery-slider__single';
+      link.href = item.url;
+      link.dataset.full = item.url;
+      link.dataset.caption =
+        item.description ||
+        item.title ||
+        '未分类 · 媒体图片';
 
-  const createSlide = (entry) => {
-    const { group, cover } = entry;
-    const link = document.createElement('a');
-    link.className = 'gallery-slider__item';
-    link.href = `album.html?id=${encodeURIComponent(group.id)}`;
-    link.setAttribute('aria-label', `查看相册「${group.title || '未命名相册'}」`);
-    link.dataset.albumId = String(group.id);
+      const img = document.createElement('img');
+      img.src = item.url;
+      img.alt = item.title || item.description || '未分类 图片';
+      img.loading = 'lazy';
 
-    const image = document.createElement('img');
-    image.className = 'gallery-slider__image';
-    image.src = cover.url;
-    image.alt = cover.title || group.title || '相册封面图片';
-    image.loading = 'lazy';
-
-    const label = document.createElement('span');
-    label.className = 'gallery-slider__label';
-    label.textContent = group.title || cover.title || '未命名相册';
-
-    link.appendChild(image);
-    link.appendChild(label);
-
-    return link;
-  };
-
-  sliderEntries.forEach((entry) => {
-    track.appendChild(createSlide(entry));
-  });
-
-  if (sliderEntries.length > 1) {
-    sliderEntries.forEach((entry) => {
-      const cloned = createSlide(entry);
-      cloned.classList.add('is-duplicate');
-      cloned.setAttribute('aria-hidden', 'true');
-      cloned.tabIndex = -1;
-      track.appendChild(cloned);
+      link.appendChild(img);
+      singlesContainer.appendChild(link);
     });
 
-    track.classList.add('is-animated');
-    const durationSeconds = Math.max(18, sliderEntries.length * 6);
-    track.style.setProperty('--gallery-scroll-duration', `${durationSeconds}s`);
+    galleryGrid.appendChild(singlesContainer);
+    lightboxController.bind(singlesContainer.querySelectorAll('.gallery-link'));
+  };
+
+  if (sliderEntries.length) {
+    const viewport = document.createElement('div');
+    viewport.className = 'gallery-slider__viewport';
+
+    const track = document.createElement('div');
+    track.className = 'gallery-slider__track';
+
+    const createSlide = (entry) => {
+      const { group, cover } = entry;
+      const slide = document.createElement('a');
+      slide.className = 'gallery-slider__item';
+
+      const labelTitle = group.title || (cover && cover.title) || '未命名相册';
+
+      if (group.id != null) {
+        slide.href = `album.html?id=${encodeURIComponent(group.id)}`;
+        slide.dataset.albumId = String(group.id);
+      } else {
+        slide.href = '#';
+        slide.setAttribute('aria-disabled', 'true');
+        slide.tabIndex = -1;
+      }
+
+      slide.setAttribute('aria-label', `查看相册「${labelTitle}」`);
+
+      const image = document.createElement('img');
+      image.className = 'gallery-slider__image';
+      image.src = cover && cover.url ? cover.url : '';
+      image.alt = (cover && cover.title) || labelTitle;
+      image.loading = 'lazy';
+
+      const label = document.createElement('span');
+      label.className = 'gallery-slider__label';
+      label.textContent = labelTitle;
+
+      slide.appendChild(image);
+      slide.appendChild(label);
+
+      return slide;
+    };
+
+    sliderEntries.forEach((entry) => {
+      track.appendChild(createSlide(entry));
+    });
+
+    if (sliderEntries.length > 1) {
+      sliderEntries.forEach((entry) => {
+        const cloned = createSlide(entry);
+        cloned.classList.add('is-duplicate');
+        cloned.setAttribute('aria-hidden', 'true');
+        cloned.tabIndex = -1;
+        track.appendChild(cloned);
+      });
+
+      track.classList.add('is-animated');
+      const durationSeconds = Math.max(18, sliderEntries.length * 6);
+      track.style.setProperty('--gallery-scroll-duration', `${durationSeconds}s`);
+    }
+
+    viewport.appendChild(track);
+    galleryGrid.appendChild(viewport);
   }
 
-  viewport.appendChild(track);
-  galleryGrid.appendChild(viewport);
+  if (hasSingles) {
+    appendSingles();
+  }
 }
 function renderVideos(videos) {
   if (!videoGrid) return;

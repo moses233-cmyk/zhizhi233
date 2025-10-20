@@ -166,40 +166,31 @@
         </section>
 
         <section
-          class="grid gap-6 lg:grid-cols-2"
-          aria-label="媒体内容预览"
+          class="flex flex-col gap-5 rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-xl"
+          aria-label="资源管理"
         >
-          <article
-            class="flex flex-col gap-5 rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-xl"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-semibold text-white">图片资源</h2>
-                <p class="text-sm text-white/60">已上传的图片将展示在此，方便预览与管理。</p>
-              </div>
-              <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70" data-images-count>0</span>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-xl font-semibold text-white">资源库</h2>
+              <p class="text-sm text-white/60">
+                资源按照相册分组展示，可拖拽调整顺序、重命名，或拖动到其他相册完成重新归类。
+              </p>
             </div>
-            <ul
-              data-images-list
-              class="grid gap-3 text-sm text-white/70"
-            ></ul>
-          </article>
+            <span
+              data-library-count
+              class="inline-flex items-center justify-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
+            >0</span>
+          </div>
 
-          <article
-            class="flex flex-col gap-5 rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-xl"
+          <p
+            data-library-empty
+            class="rounded-2xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-center text-sm text-white/50"
+            hidden
           >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-semibold text-white">视频资源</h2>
-                <p class="text-sm text-white/60">用于展示或下载的视频文件集中在此。</p>
-              </div>
-              <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70" data-videos-count>0</span>
-            </div>
-            <ul
-              data-videos-list
-              class="grid gap-3 text-sm text-white/70"
-            ></ul>
-          </article>
+            暂无任何媒体资源，上传后即可在此管理。
+          </p>
+
+          <div data-album-library class="flex flex-col gap-4"></div>
         </section>
 
         <section
