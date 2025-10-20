@@ -283,15 +283,18 @@ body.album-slider-active .album-header {
 }
 
 .slider-image {
-  z-index: 80;
+  z-index: 120;
+  pointer-events: none;
 }
 
 .slider-image-bg {
-  z-index: 85;
+  z-index: 60;
+  pointer-events: none;
 }
 
 .slider-image-next {
-  z-index: 90;
+  z-index: 130;
+  pointer-events: none;
 }
 
 .transition-overlay {

@@ -142,9 +142,62 @@ async function renderMedia() {
 
     renderImages(albumGroups, unassignedImages);
     renderVideos(videos);
+    updateAlbumDropdown(albumRes.data);
   } catch (error) {
     console.error('加载媒体内容失败', error);
+    updateAlbumDropdown([]);
   }
+}
+
+function updateAlbumDropdown(albums) {
+  const list = document.querySelector('[data-album-dropdown]');
+  if (!list) return;
+
+  const dropdownItem = list.closest('[data-nav-dropdown]');
+  const label = dropdownItem?.querySelector('.nav__dropdown-label');
+  list.innerHTML = '';
+
+  if (!Array.isArray(albums) || !albums.length) {
+    if (label) {
+      label.textContent = '相册';
+    }
+    const empty = document.createElement('li');
+    empty.className = 'nav__dropdown-empty';
+    empty.textContent = '暂无相册';
+    list.appendChild(empty);
+    dropdownItem?.classList.remove('is-ready');
+    return;
+  }
+
+  if (label) {
+    label.textContent = '相册';
+  }
+
+  const collator =
+    typeof Intl !== 'undefined' && typeof Intl.Collator === 'function'
+      ? new Intl.Collator('zh-Hans-CN', { sensitivity: 'base', usage: 'sort' })
+      : null;
+
+  const sorted = [...albums].sort((a, b) => {
+    const titleA = (a?.title || '未命名相册').trim();
+    const titleB = (b?.title || '未命名相册').trim();
+    return collator ? collator.compare(titleA, titleB) : titleA.localeCompare(titleB);
+  });
+
+  sorted.forEach((album) => {
+    if (!album || album.id == null) return;
+    const title = (album.title || '未命名相册').trim() || '未命名相册';
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.className = 'nav__dropdown-link';
+    link.href = `album.html?id=${encodeURIComponent(album.id)}`;
+    link.textContent = title;
+    link.setAttribute('role', 'menuitem');
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+
+  dropdownItem?.classList.add('is-ready');
 }
 
 function renderImages(albumGroups, unassignedImages) {

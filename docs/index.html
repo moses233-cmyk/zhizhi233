@@ -24,8 +24,25 @@
           <li class="nav__item nav__item--selected">
             <a href="#profile" data-i18n="nav.profile" aria-current="page">个人卡片</a>
           </li>
-          <li class="nav__item">
-            <a href="#gallery" data-i18n="nav.gallery">图片作品</a>
+          <li class="nav__item nav__item--has-dropdown" data-nav-dropdown>
+            <a
+              href="#gallery"
+              class="nav__link nav__link--gallery"
+              data-i18n="nav.gallery"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
+              图片作品
+              <span class="nav__caret" aria-hidden="true"></span>
+            </a>
+            <div class="nav__dropdown" role="menu">
+              <div class="nav__dropdown-inner">
+                <p class="nav__dropdown-label">相册</p>
+                <ul class="nav__dropdown-list" data-album-dropdown>
+                  <li class="nav__dropdown-empty">加载中…</li>
+                </ul>
+              </div>
+            </div>
           </li>
           <li class="nav__item">
             <a href="#video" data-i18n="nav.video">视频作品</a>

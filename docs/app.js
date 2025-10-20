@@ -715,6 +715,80 @@ function initIntersectionHighlights() {
   sections.forEach((section) => observer.observe(section));
 }
 
+function initNavDropdown() {
+  const dropdownItem = document.querySelector('[data-nav-dropdown]');
+  if (!dropdownItem) return;
+
+  const trigger = dropdownItem.querySelector('.nav__link--gallery');
+  const panel = dropdownItem.querySelector('.nav__dropdown');
+  if (!trigger || !panel) return;
+
+  const setOpen = (open) => {
+    dropdownItem.classList.toggle('is-open', open);
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+
+  const open = () => {
+    cancelClose();
+    setOpen(true);
+  };
+  const close = () => {
+    cancelClose();
+    setOpen(false);
+  };
+
+  let closeTimer;
+  const scheduleClose = () => {
+    closeTimer = window.setTimeout(close, 150);
+  };
+  const cancelClose = () => {
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = undefined;
+    }
+  };
+
+  dropdownItem.addEventListener('mouseenter', () => {
+    cancelClose();
+    open();
+  });
+
+  dropdownItem.addEventListener('mouseleave', () => {
+    cancelClose();
+    scheduleClose();
+  });
+
+  trigger.addEventListener('focus', open);
+  panel.addEventListener('focusin', open);
+
+  dropdownItem.addEventListener('focusout', (event) => {
+    if (!dropdownItem.contains(event.relatedTarget)) {
+      close();
+    }
+  });
+
+  trigger.addEventListener('click', (event) => {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile && !dropdownItem.classList.contains('is-open')) {
+      event.preventDefault();
+      open();
+    }
+  });
+
+  panel.addEventListener('click', (event) => {
+    if (event.target instanceof HTMLElement && event.target.closest('.nav__dropdown-link')) {
+      close();
+    }
+  });
+
+  dropdownItem.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      close();
+      trigger.focus();
+    }
+  });
+}
+
 function initNavbarVisibility() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
@@ -992,6 +1066,7 @@ function init() {
   }
   initSmoothScroll();
   initIntersectionHighlights();
+  initNavDropdown();
   initNavbarVisibility();
   initGalleryLightbox();
   initAnimatedTestimonials();
