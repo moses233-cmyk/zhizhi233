@@ -199,6 +199,7 @@
 
     const images = data.images || [];
     const album = data.album || {};
+    const albumViewRoot = document.getElementById('album-view');
     const grid = document.getElementById('grid');
     const sliderImage = document.getElementById('slider-image');
     const sliderImageNext = document.getElementById('slider-image-next');
@@ -241,6 +242,14 @@
       };
     });
 
+    const applyModeClasses = (mode) => {
+      const isSlider = mode === 'slider';
+      document.body.classList.toggle('album-slider-active', isSlider);
+      document.body.classList.toggle('album-grid-active', !isSlider);
+      albumViewRoot?.classList.toggle('album-view--grid', !isSlider);
+    };
+
+    applyModeClasses('grid');
     grid.innerHTML = '';
     thumbnailsContainer.innerHTML = '';
 
@@ -352,6 +361,7 @@
               duration: TIMING.BASE,
               ease: 'mainEase',
               onComplete: () => {
+                applyModeClasses('slider');
                 gsap.to(grid, {
                   opacity: 0,
                   duration: TIMING.SHORTEST,
@@ -401,103 +411,107 @@
 
     const showGridView = () =>
       new Promise((resolve) => {
-        const activeItem = getGridItemByIndex(activeIndex) || gridItems[0];
-        if (!activeItem) {
-          resolve();
-          return;
-        }
+        applyModeClasses('grid');
 
-        const activeItemRect = activeItem.getBoundingClientRect();
+        requestAnimationFrame(() => {
+          const activeItem = getGridItemByIndex(activeIndex) || gridItems[0];
+          if (!activeItem) {
+            resolve();
+            return;
+          }
 
-        const contentTl = gsap.timeline({
-          onComplete: () => {
-            gsap.to(grid, {
-              opacity: 1,
-              duration: TIMING.SHORTEST,
-              ease: 'power2.inOut',
-            });
+          const activeItemRect = activeItem.getBoundingClientRect();
 
-            gsap.set([sliderImageNext, sliderImageBg, transitionOverlay], {
+          const contentTl = gsap.timeline({
+            onComplete: () => {
+              gsap.to(grid, {
+                opacity: 1,
+                duration: TIMING.SHORTEST,
+                ease: 'power2.inOut',
+              });
+
+              gsap.set([sliderImageNext, sliderImageBg, transitionOverlay], {
+                opacity: 0,
+                visibility: 'hidden',
+              });
+
+              const widthState = Flip.getState(sliderImage);
+              gsap.set(sliderImage, {
+                width: activeItemRect.width,
+                x: activeItemRect.left,
+                height: '100vh',
+                y: 0,
+              });
+
+              Flip.from(widthState, {
+                duration: TIMING.BASE,
+                ease: 'mainEase',
+                onComplete: () => {
+                  const heightState = Flip.getState(sliderImage);
+                  gsap.set(sliderImage, {
+                    height: activeItemRect.height,
+                    y: activeItemRect.top,
+                  });
+
+                  Flip.from(heightState, {
+                    duration: TIMING.BASE,
+                    ease: 'mainEase',
+                    onComplete: () => {
+                      gsap.to(sliderImage, {
+                        opacity: 0,
+                        duration: TIMING.SHORTEST,
+                        ease: 'power2.inOut',
+                        onComplete: () => {
+                          sliderImage.style.visibility = 'hidden';
+                          resolve();
+                        },
+                      });
+                    },
+                  });
+                },
+              });
+            },
+          });
+
+          contentTl.to(
+            thumbnailItems,
+            {
               opacity: 0,
-              visibility: 'hidden',
-            });
-
-            const widthState = Flip.getState(sliderImage);
-            gsap.set(sliderImage, {
-              width: activeItemRect.width,
-              x: activeItemRect.left,
-              height: '100vh',
-              y: 0,
-            });
-
-            Flip.from(widthState, {
-              duration: TIMING.BASE,
+              y: 20,
+              duration: TIMING.SHORT,
+              stagger: -TIMING.STAGGER_TINY,
+              ease: 'sideEase',
+            },
+            0,
+          );
+          contentTl.to(
+            contentParagraph,
+            {
+              opacity: 0,
+              duration: TIMING.SHORT,
               ease: 'mainEase',
-              onComplete: () => {
-                const heightState = Flip.getState(sliderImage);
-                gsap.set(sliderImage, {
-                  height: activeItemRect.height,
-                  y: activeItemRect.top,
-                });
-
-                Flip.from(heightState, {
-                  duration: TIMING.BASE,
-                  ease: 'mainEase',
-                  onComplete: () => {
-                    gsap.to(sliderImage, {
-                      opacity: 0,
-                      duration: TIMING.SHORTEST,
-                      ease: 'power2.inOut',
-                      onComplete: () => {
-                        sliderImage.style.visibility = 'hidden';
-                        resolve();
-                      },
-                    });
-                  },
-                });
-              },
-            });
-          },
+            },
+            TIMING.STAGGER_TINY,
+          );
+          contentTl.to(
+            contentTitle,
+            {
+              y: '100%',
+              duration: TIMING.SHORT,
+              ease: 'sideEase',
+            },
+            TIMING.STAGGER_SMALL,
+          );
+          contentTl.to(
+            content,
+            {
+              opacity: 0,
+              duration: TIMING.SHORT,
+              ease: 'mainEase',
+            },
+            TIMING.STAGGER_MED,
+          );
         });
-
-        contentTl.to(
-          thumbnailItems,
-          {
-            opacity: 0,
-            y: 20,
-            duration: TIMING.SHORT,
-            stagger: -TIMING.STAGGER_TINY,
-            ease: 'sideEase',
-          },
-          0,
-        );
-        contentTl.to(
-          contentParagraph,
-          {
-            opacity: 0,
-            duration: TIMING.SHORT,
-            ease: 'mainEase',
-          },
-          TIMING.STAGGER_TINY,
-        );
-        contentTl.to(
-          contentTitle,
-          {
-            y: '100%',
-            duration: TIMING.SHORT,
-            ease: 'sideEase',
-          },
-          TIMING.STAGGER_SMALL,
-        );
-        contentTl.to(
-          content,
-          {
-            opacity: 0,
-            duration: TIMING.SHORT,
-            ease: 'mainEase',
-          },
-          TIMING.STAGGER_MED,
-        );
       });
 
     const transitionToSlide = (index) => {
