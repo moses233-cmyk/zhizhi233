@@ -723,18 +723,21 @@ function initNavbarVisibility() {
   let ticking = false;
   const deltaThreshold = 6;
   const revealOffset = navbar.offsetHeight;
+  let isHidden = navbar.classList.contains('navbar--hidden');
 
   const updateVisibility = () => {
-    const currentY = window.pageYOffset;
+    const currentY = window.scrollY || window.pageYOffset;
     const delta = currentY - lastScrollY;
 
     const shouldReveal = delta < -deltaThreshold || currentY <= revealOffset;
     const shouldHide = delta > deltaThreshold && currentY > revealOffset;
 
-    if (shouldReveal) {
+    if (shouldReveal && isHidden) {
       navbar.classList.remove('navbar--hidden');
-    } else if (shouldHide) {
+      isHidden = false;
+    } else if (shouldHide && !isHidden) {
       navbar.classList.add('navbar--hidden');
+      isHidden = true;
     }
 
     lastScrollY = currentY;
